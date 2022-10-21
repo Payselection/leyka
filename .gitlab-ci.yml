@@ -1,0 +1,31 @@
+stages:
+  - predeploy
+  - deploy
+
+deploy-wp:
+  stage: predeploy
+  when: manual
+  tags:
+    - dev-wp-2
+  script:
+    - docker-compose up -d
+    #- wget https://github.com/Teplitsa/Leyka/archive/master.tar.gz
+    #- tar xvf master.tar.gz —strip 1 —exclude=.gitignore —exclude=README.md --directory /var/www/html/wp-content/plugins/Layka
+
+restart-wp:
+  stage: predeploy
+  when: manual
+  tags:
+   - dev-wp
+  script:
+    - docker-compose stop
+    - docker-compose up -d
+
+plugin-deploy:
+  stage: deploy
+  when: manual
+  tags:
+    - dev-wp
+  script:
+    - sudo chown -R gitlab-runner *
+    - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways /var/www/html/wp-content/plugins/Layka
