@@ -28,4 +28,4 @@ plugin-deploy:
     - dev-wp-2
   script:
     - sudo chown -R gitlab-runner *
-    - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways /var/www/html/wp-content/plugins/Layka/gateways
+    - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways/payselection /var/www/html/wp-content/plugins/Layka/gateways
