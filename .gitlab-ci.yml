@@ -16,7 +16,7 @@ restart-wp:
   stage: predeploy
   when: manual
   tags:
-   - dev-wp
+   - dev-wp-2
   script:
     - docker-compose stop
     - docker-compose up -d
@@ -25,7 +25,7 @@ plugin-deploy:
   stage: deploy
   when: manual
   tags:
-    - dev-wp
+    - dev-wp-2
   script:
     - sudo chown -R gitlab-runner *
     - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways /var/www/html/wp-content/plugins/Layka/gateways
