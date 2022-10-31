@@ -1,6 +1,6 @@
 <?php
 
-namespace Payselection;
+namespace Payselection\Donation;
 
 class Functions
 {

@@ -1,11 +1,9 @@
 <?php
 
-namespace Payselection;
+namespace Payselection\Donation;
 
 class Api
 {
-    protected $options;
-
     /**
      * request Send request to API server
      *

@@ -112,7 +112,7 @@
 
             }
 
-            if (response.ps_method == 'widget') {
+            if (response.payselection_method == 'widget') {
                 const widget = new pw.PayWidget();
 
                 if(response.additional_fields && !$.isEmptyObject(response.additional_fields)) {
@@ -131,25 +131,22 @@
                 }, response.request, {
                     onSuccess: (res) => {
                         console.log("onSuccess from shop", res);
-                        // window.location.href = response.success_page;
+                        //window.location.href = response.success_page;
                         // $errors.html('').hide();
                     },
                     onError: (res) => {
                         console.log("onFail from shop", res);
-                        addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
+                        //addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
                         //window.location.href = response.failure_page;
                     },
                     onClose: () => {
-                        //window.location.href = response.cancel_page;
                     }
                 });
             }
 
-            if (response.ps_method == 'redirect') {
-                if ( response.submission_redirect_type == 'redirect' 
-                        && response.payment_url
-                ) {
-                    window.location.href = response.payment_url;
+            if (response.payselection_method == 'redirect') {
+                if (response.payselection_redirect_url) {
+                    window.location.href = response.payselection_redirect_url;
                 }
             }
 

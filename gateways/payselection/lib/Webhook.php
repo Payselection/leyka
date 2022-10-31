@@ -1,15 +1,9 @@
 <?php
 
-namespace Payselection;
+namespace Payselection\Donation;
 
-use Payselection\Api;
-
-class Webhook extends Api
+class Webhook
 {
-    public function __construct() {
-        parent::__construct();
-    }
-
       /**
      * handle Webhook handler
      *
@@ -47,9 +41,6 @@ class Webhook extends Api
     {
         $request = file_get_contents('php://input');
         $headers = getallheaders();
-
-        // $this->debug(wc_print_r($request, true));
-        // $this->debug(wc_print_r($headers, true));
 
         if (
             empty($request) ||
