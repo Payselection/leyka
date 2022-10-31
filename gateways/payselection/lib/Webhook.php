@@ -2,7 +2,9 @@
 
 namespace Payselection\Donation;
 
-class Webhook
+use Payselection\Donation\Api;
+
+class Webhook extends Api
 {
       /**
      * handle Webhook handler
@@ -25,7 +27,7 @@ class Webhook
         // Check signature
         $signBody = $_SERVER['REQUEST_METHOD'] . PHP_EOL . home_url('/leyka/service/payselection/process') . PHP_EOL . leyka_options()->opt('payselection_site_id') . PHP_EOL . $request;
 
-        if ($headers['X-WEBHOOK-SIGNATURE'] !== self::getSignature($signBody, leyka_options()->opt('payselection_key'))) {
+        if ($headers['X-WEBHOOK-SIGNATURE'] !== Api::getSignature($signBody, leyka_options()->opt('payselection_key'))) {
             return new \WP_Error('leyka_webhook_error', __('Signature error', 'leyka'));
         }
 

@@ -312,20 +312,27 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $data = file_get_contents('php://input');
 
-        $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
-        $current = file_get_contents($file);
-        $current .= $data."\n";
-        $open = file_put_contents($file, $current);
-        
+        // $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
+        // $current = file_get_contents($file);
+        // $current .= $data."\n";
+        // $open = file_put_contents($file, $current);
+
         $check = \Payselection\Donation\Webhook::verify_header_signature($data);
+
+        // $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
+        // $current = file_get_contents($file);
+        // foreach (getallheaders() as $name => $value) {
+        //     $current .= $name.' = '.$value.'  '.$check."\n";
+        // }
+        // $open = file_put_contents($file, $current);
+
+        $data = json_decode($data, true);
         
         if(is_wp_error($check)) {
             wp_die($check->get_error_message());
-        } else if(empty($data['Event']) || !is_string($data['Event'])) {
+        } elseif(empty($data['Event']) || !is_string($data['Event'])) {
             wp_die(__('Webhook error: Event field is not found or have incorrect value', 'leyka'));
         }
-
-        $data = json_decode($data, true);
 
         $donation_string = explode('-', $data['OrderId']);
 
