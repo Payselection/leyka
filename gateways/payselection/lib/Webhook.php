@@ -18,17 +18,27 @@ class Webhook extends Api
         if (
             empty($request) ||
             empty($headers['X-SITE-ID']) ||
-            leyka_options()->opt('payselection_site_id') != $headers['X-SITE-ID'] ||
             empty($headers['X-WEBHOOK-SIGNATURE'])
         ) {
-            return new \WP_Error('leyka_webhook_error', __('Missing required parameter', 'leyka'));
+            return new \WP_Error('payselection_donation_webhook_error', __('A call to your Payselection callbacks URL was made with a missing required parameter.', 'leyka'));
+        }
+
+        if (leyka_options()->opt('payselection_site_id') != $headers['X-SITE-ID'] ) {
+            return new \WP_Error(
+                'payselection_donation_webhook_error',
+                sprintf(__('a call to your Payselection callback was called with wrong site id. Site id from request: %s, Site id from options: %s', 'leyka'), $headers['X-SITE-ID'], leyka_options()->opt('payselection_site_id'))
+            );
         }
         
         // Check signature
         $signBody = $_SERVER['REQUEST_METHOD'] . PHP_EOL . home_url('/leyka/service/payselection/process') . PHP_EOL . leyka_options()->opt('payselection_site_id') . PHP_EOL . $request;
+        $signCalculated = Api::getSignature($signBody, leyka_options()->opt('payselection_key'));
 
-        if ($headers['X-WEBHOOK-SIGNATURE'] !== Api::getSignature($signBody, leyka_options()->opt('payselection_key'))) {
-            return new \WP_Error('leyka_webhook_error', __('Signature error', 'leyka'));
+        if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
+            return new \WP_Error(
+                'payselection_donation_webhook_error',
+                sprintf(__('A call to your Payselection callback was called with wrong digital signature. It may mean that someone is trying to hack your payment website. Signature from request: %s, Signature calculated: %s', 'leyka'), $headers['X-WEBHOOK-SIGNATURE'], $signCalculated)
+            );
         }
 
         return true;
