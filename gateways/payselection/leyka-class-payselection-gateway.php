@@ -312,125 +312,180 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $data = file_get_contents('php://input');
 
-        $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
-        $current = file_get_contents($file);
-        $current .= $data."\n";
-        $open = file_put_contents($file, $current);
+        if ($data) {
 
-        $check = \Payselection\Donation\Webhook::verify_header_signature($data);
+            $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
+            $current = file_get_contents($file);
+            $current .= $data."\n";
+            $open = file_put_contents($file, $current);
 
-        // $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors.txt'; 
-        // $current = file_get_contents($file);
-        // foreach (getallheaders() as $name => $value) {
-        //     $current .= $name.' = '.$value.'  '.$check."\n";
-        // }
-        // $open = file_put_contents($file, $current);
+            $check = \Payselection\Donation\Webhook::verify_header_signature($data);
+            
+            if (is_wp_error($check)) {
 
-        $data = json_decode($data, true);
-        
-        if(is_wp_error($check)) {
+                if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
 
-            if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
+                    $message = sprintf(__('This message has been sent because %s The details of the call are below:', 'leyka'), $check->get_error_message)."\n\r\n\r"
+                    .esc_html($check->get_error_message())."\n\r\n\r"
+                    ."POST:\n\r".print_r($_POST, true)."\n\r\n\r"
+                    ."GET:\n\r".print_r($_GET, true)."\n\r\n\r"
+                    ."SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
 
-                $message = sprintf(__('This message has been sent because %s The details of the call are below:', 'leyka'), $check->get_error_message)."\n\r\n\r"
-                .esc_html($check->get_error_message())."\n\r\n\r"
-                ."POST:\n\r".print_r($_POST, true)."\n\r\n\r"
-                ."GET:\n\r".print_r($_GET, true)."\n\r\n\r"
-                ."SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
+                    wp_mail(
+                        leyka_get_website_tech_support_email(),
+                        __('Payselection callback error.', 'leyka'),
+                        $message
+                    );
 
-                wp_mail(
-                    leyka_get_website_tech_support_email(),
-                    __('Payselection callback error.', 'leyka'),
-                    $message
-                );
+                }
+
+                $donation->add_gateway_response($_REQUEST);
+                $donation->status = 'failed';
+
+                die();
+
+            } 
+
+            $response = [];
+            try {
+
+                $response = json_decode($data, true);
+                $response = $response ? : $_POST;
+
+            } catch(\Exception $ex) {
+                error_log($ex);
+            }
+
+            if(empty($response['Event']) || !is_string($response['Event'])) {
+                wp_die(__('Webhook error: Event field is not found or have incorrect value', 'leyka'));
+            }
+
+            $response['Currency'] = mb_strtolower($response['Currency']);
+            if( !in_array($response['Currency'], ['rub', 'usd', 'eur', 'kgs']) ) {
+
+                if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
+
+                    $message = __("This message has been sent because a call to your Payselection callbacks URL was made with a currency parameter (POST['currency']) that Leyka is unknown of. The details of the call are below.", 'leyka')."\n\r\n\r";
+
+                    $message .= "POST:\n\r".print_r($_POST, true)."\n\r\n\r";
+                    $message .= "GET:\n\r".print_r($_GET, true)."\n\r\n\r";
+                    $message .= "SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
+
+                    wp_mail(
+                        leyka_get_website_tech_support_email(),
+                        __('Payselection gives unknown currency parameter!', 'leyka'),
+                        $message
+                    );
+
+                }
+
+                die();
 
             }
 
-            $donation->add_gateway_response($_REQUEST);
-            $donation->status = 'failed';
+            $donation_string = explode('-', $response['OrderId']);
 
-            die();
+            $donation = Leyka_Donations::get_instance()->get_donation((int)$donation_string[0]);
 
-        } elseif(empty($data['Event']) || !is_string($data['Event'])) {
-            wp_die(__('Webhook error: Event field is not found or have incorrect value', 'leyka'));
-        }
+            if( !$donation ) {
 
-        $_POST['Currency'] = mb_strtolower($_POST['Currency']);
-        if( !in_array($_POST['currency'], ['rub', 'usd', 'eur', 'kgs']) ) {
+                if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
 
-            if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
+                    $message = __("This message has been sent because a call to your Payselection callbacks URL was made with a donation ID parameter that Leyka is unknown of. The details of the call are below.", 'leyka')."\n\r\n\r";
 
-                $message = __("This message has been sent because a call to your Payselection callbacks URL was made with a currency parameter (POST['currency']) that Leyka is unknown of. The details of the call are below.", 'leyka')."\n\r\n\r";
+                    $message .= "POST:\n\r".print_r($_POST, true)."\n\r\n\r";
+                    $message .= "GET:\n\r".print_r($_GET, true)."\n\r\n\r";
+                    $message .= "SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
+                    $message .= "Donation ID: ".$_POST['cs2']."\n\r\n\r";
 
-                $message .= "POST:\n\r".print_r($_POST, true)."\n\r\n\r";
-                $message .= "GET:\n\r".print_r($_GET, true)."\n\r\n\r";
-                $message .= "SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
+                    wp_mail(
+                        leyka_get_website_tech_support_email(),
+                        __('Payselection gives unknown donation ID parameter!', 'leyka'),
+                        $message
+                    );
 
-                wp_mail(
-                    leyka_get_website_tech_support_email(),
-                    __('Payselection gives unknown currency parameter!', 'leyka'),
-                    $message
-                );
+                }
 
-            }
-
-            die();
-
-        }
-
-        $donation_string = explode('-', $data['OrderId']);
-
-        $donation = Leyka_Donations::get_instance()->get_donation((int)$donation_string[0]);
-
-        if( !$donation ) {
-
-            if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
-
-                $message = __("This message has been sent because a call to your Payselection callbacks URL was made with a donation ID parameter that Leyka is unknown of. The details of the call are below.", 'leyka')."\n\r\n\r";
-
-                $message .= "POST:\n\r".print_r($_POST, true)."\n\r\n\r";
-                $message .= "GET:\n\r".print_r($_GET, true)."\n\r\n\r";
-                $message .= "SERVER:\n\r".print_r(apply_filters('leyka_notification_server_data', $_SERVER), true)."\n\r\n\r";
-                $message .= "Donation ID: ".$_POST['cs2']."\n\r\n\r";
-
-                wp_mail(
-                    leyka_get_website_tech_support_email(),
-                    __('Payselection gives unknown donation ID parameter!', 'leyka'),
-                    $message
-                );
+                die();
 
             }
 
-            die();
+            switch ($response['Event']) {
+                case 'Payment':
+                    $donation->status = 'funded';
+                    break;
 
-        }
+                case 'Fail':
+                    $donation->status = 'failed';
+                    break;
 
-        switch ($data['Event'])
-        {
-            case 'Payment':
-                $donation->status = 'refunded';
-                break;
+                case 'Block':
+                    //$donation->update_meta_data('BlockTransactionId', esc_sql($response['TransactionId']));
+                    $donation->status = 'refunded';
+                    break;
 
-            case 'Fail':
-                $donation->status = 'refunded';
-                break;
+                case 'Refund':
+                    $donation->status = 'refunded';
+                    break;
 
-            case 'Block':
-                //$donation->update_meta_data('BlockTransactionId', esc_sql($data['TransactionId']));
-                $donation->status = 'refunded';
-                break;
+                case 'Cancel':
+                    $donation->status = 'refunded';
+                    break;
 
-            case 'Refund':
-                $donation->status = 'refunded';
-                break;
+                default:
+                    wp_die('There is no handler for this event', 'payselection', array('response' => 404));
+                    break;
+            }
 
-            case 'Cancel':
-                $donation->status = 'refunded';
-                break;
+            if( !empty($response['TransactionId']) ) {
+                $donation->payselection_transaction_id = esc_sql($response['TransactionId']);
+            }
 
-            default:
-                wp_die('There is no handler for this event', 'payselection', array('response' => 404));
-                break;
+            if( !empty($response['RebillId']) ) {
+                $donation->payselection_recurring_id = esc_sql($response['RebillId']);
+            }
+
+            $donation->add_gateway_response($response);
+
+            if($donation->type === 'rebill') {
+                do_action('leyka_new_rebill_donation_added', $donation);
+            }
+
+            if( // GUA direct integration - "purchase" event:
+                $donation->status === 'funded'
+                && leyka_options()->opt('use_gtm_ua_integration') === 'enchanced_ua_only'
+                && leyka_options()->opt('gtm_ua_tracking_id')
+                && in_array('purchase', leyka_options()->opt('gtm_ua_enchanced_events'))
+                // We should send data to GA only for single or init recurring donations:
+                && ($donation->type === 'single' || $donation->is_init_recurring_donation)
+            ) {
+    
+                require_once LEYKA_PLUGIN_DIR.'vendor/autoload.php';
+    
+                $analytics = new TheIconic\Tracking\GoogleAnalytics\Analytics(true);
+                $analytics // Main params:
+                    ->setProtocolVersion('1')
+                    ->setTrackingId(leyka_options()->opt('gtm_ua_tracking_id'))
+                    ->setClientId($donation->ga_client_id ? $donation->ga_client_id : leyka_gua_get_client_id())
+                    // Transaction params:
+                    ->setTransactionId($donation->id)
+                    ->setAffiliation(get_bloginfo('name'))
+                    ->setRevenue($donation->amount)
+                    ->addProduct([ // Donation params
+                        'name' => $donation->payment_title,
+                        'price' => $donation->amount,
+                        'brand' => get_bloginfo('name'), // Mb, it won't work with it
+                        'category' => $donation->type_label, // Mb, it won't work with it
+                        'quantity' => 1,
+                    ])
+                    ->setProductActionToPurchase()
+                    ->setEventCategory('Checkout')
+                    ->setEventAction('Purchase')
+                    ->sendEvent();
+    
+            }
+            // GUA direct integration - "purchase" event END
+
         }
 
     }
