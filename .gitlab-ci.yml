@@ -10,7 +10,7 @@ deploy-wp:
   script:
     - docker-compose up -d
     - sleep 25
-    - cd /var/www/html/wp-content/plugins && chmod 777 . && git clone https://github.com/Teplitsa/Leyka.git
+    - cd /var/www/html/wp-content/plugins && sudo chmod 777 . && git clone https://github.com/Teplitsa/Leyka.git
 
 restart-wp:
   stage: predeploy
@@ -28,7 +28,7 @@ full-destroy:
    - dev-wp-2
   script:
     - docker-compose down --volumes
-    - sudo rm -rf /var/www/html && docker volume rm layka_db_data
+    - sudo rm -rf /var/www/html
 
 plugin-deploy:
   stage: deploy
