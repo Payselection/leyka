@@ -28,7 +28,7 @@ full-destroy:
    - dev-wp-2
   script:
     - docker-compose stop
-    - rm -rf /var/www/html && docker volume rm layka_db_data
+    - sudo rm -rf /var/www/html && docker volume rm layka_db_data
 
 plugin-deploy:
   stage: deploy
