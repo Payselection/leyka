@@ -9,8 +9,8 @@ deploy-wp:
     - dev-wp-2
   script:
     - docker-compose up -d
-    #- wget https://github.com/Teplitsa/Leyka/archive/master.tar.gz
-    #- tar xvf master.tar.gz —strip 1 —exclude=.gitignore —exclude=README.md --directory /var/www/html/wp-content/plugins/Layka
+    - sleep 25
+    - cd /var/www/html/wp-content/plugins && sudo chmod 777 . && git clone https://github.com/Teplitsa/Leyka.git
 
 restart-wp:
   stage: predeploy
@@ -20,6 +20,15 @@ restart-wp:
   script:
     - docker-compose stop
     - docker-compose up -d
+
+full-destroy:
+  stage: predeploy
+  when: manual
+  tags:
+   - dev-wp-2
+  script:
+    - docker-compose down --volumes
+    - sudo rm -rf /var/www/html
 
 plugin-deploy:
   stage: deploy
