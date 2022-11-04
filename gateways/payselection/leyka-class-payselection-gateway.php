@@ -3,7 +3,7 @@
  * Leyka_Payselection_Gateway class
  */
 
-//require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Donation_Helper.php';
+require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Donation_Helper.php';
 
 class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
@@ -14,7 +14,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
     protected function __construct() {
 
         parent::__construct();
-
+        require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Merchant_Api.php';
         $this->_ps_method = empty(leyka_options()->opt('payselection_method')) ||  leyka_options()->opt('payselection_method') !== 'redirect' ? 'widget' : 'redirect';
         // add_filter('leyka_donation_statuses', function() {
         //     return [
@@ -26,7 +26,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         //         'trashgggggggg'     => _x('Trashggggg', '«Deleted» donation status', 'leyka'),
         //     ];
         // }, 10, 2);
-        add_action('leyka_donation_status_funded_to_refunded', [$this, '_donation_status_funded_to_refunded_watcher'], 10);
+        //add_action('leyka_donation_status_funded_to_refunded', [$this, '_donation_status_funded_to_refunded_watcher'], 10, 1);
     }
 
     protected function _set_attributes() {
@@ -90,7 +90,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                 'type' => 'text',
                 'title' => __('Create Payment host', 'leyka'),
                 'comment' => __('Leave blank if you dont know what you do.', 'leyka'),
-                //'required' => true,
+                'required' => true,
                 'default' => 'https://webform.payselection.com',
             ],
             'payselection_site_id' => [
@@ -322,7 +322,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $open = file_put_contents($file, $current);
 
         $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
-        
+
         if (is_wp_error($check)) {
 
             if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
@@ -669,8 +669,8 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         );
         $response = $api->rebill([
             'OrderId' => $new_recurring_donation->id,
-            'Amount' => absint($new_recurring_donation->amount),
-            'Currency' => absint($new_recurring_donation->currency),
+            'Amount' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
+            'Currency' => $new_recurring_donation->currency,
             'RebillId' => $new_recurring_donation->payselection_recurring_id,
             'PayOnlyFlag' => true,
             'WebhookUrl' => home_url('/leyka/service/payselection/process'),
@@ -971,60 +971,60 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     }
 
-    protected function _donation_status_funded_to_refunded_watcher(Leyka_Donation_Base $donation) {
-        if( $donation->status !== 'funded'  ) {
-            return;
-        }
+    // protected function _donation_status_funded_to_refunded_watcher(Leyka_Donation_Base $donation) {
+        
 
-        if (!empty($donation->payselection_transaction_id)) {
-            $this->_require_lib();
-            $api = new \Payselection_Merchant_Api(
-                leyka_options()->opt('payselection_site_id'),
-                leyka_options()->opt('payselection_key'),
-                leyka_options()->opt('payselection_host'),
-                leyka_options()->opt('payselection_create_host')
-            );
-            $response = $api->rebill([
-                'TransactionId' => $donation->payselection_transaction_id,
-                'Amount' => absint($donation->amount),
-                'Currency' => absint($donation->currency),
-                'WebhookUrl' => home_url('/leyka/service/payselection/process'),
-                'ReceiptData' => [
-                    'timestamp' => date('d.m.Y H:i:s'),
-                    'external_id' => (string) $donation->id,
-                    'receipt' => [
-                        'client' => [
-                            'name' => $donation->donor_name,
-                            'email' => $donation->donor_email,
-                        ],
-                        'company' => [
-                            'inn' => '',
-                            'payment_address' => '',
-                        ],
-                        'items' => [
-                            'name' => 'donation',
-                            'price' => number_format(floatval($donation->amount), 2, '.', ''),
-                            'quantity' => '1',
-                            'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                            'vat' => ''
-                        ],
-                        'payments' => [
-                            'type' => 1,
-                            'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                        ],
-                        'total' => number_format(floatval($donation->amount), 2, '.', ''),
-                    ],
-                ]
-            ]);
+        
 
-            if (is_wp_error($response)) {
-                return new WP_Error(
-                    'payselection_error_cancel_subscription',
-                    sprintf(__('The recurring subsciption cancelling request returned unexpected result. We cannot cancel the recurring subscription automatically. Error: %s', 'leyka'), $response->get_error_message())
-                );
-            }
-        }
-    }
+    //     if (!empty($donation->payselection_transaction_id)) {
+    //         $this->_require_lib();
+    //         $api = new \Payselection_Merchant_Api(
+    //             leyka_options()->opt('payselection_site_id'),
+    //             leyka_options()->opt('payselection_key'),
+    //             leyka_options()->opt('payselection_host'),
+    //             leyka_options()->opt('payselection_create_host')
+    //         );
+    //         return $response = $api->refund([
+    //             'TransactionId' => $donation->payselection_transaction_id,
+    //             'Amount' => number_format(floatval($donation->amount), 2, '.', ''),
+    //             'Currency' => $donation->currency,
+    //             'WebhookUrl' => home_url('/leyka/service/payselection/process'),
+    //             'ReceiptData' => [
+    //                 'timestamp' => date('d.m.Y H:i:s'),
+    //                 'external_id' => (string) $donation->id,
+    //                 'receipt' => [
+    //                     'client' => [
+    //                         'name' => $donation->donor_name,
+    //                         'email' => $donation->donor_email,
+    //                     ],
+    //                     'company' => [
+    //                         'inn' => '',
+    //                         'payment_address' => '',
+    //                     ],
+    //                     'items' => [
+    //                         'name' => 'donation',
+    //                         'price' => number_format(floatval($donation->amount), 2, '.', ''),
+    //                         'quantity' => '1',
+    //                         'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+    //                         'vat' => ''
+    //                     ],
+    //                     'payments' => [
+    //                         'type' => 1,
+    //                         'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+    //                     ],
+    //                     'total' => number_format(floatval($donation->amount), 2, '.', ''),
+    //                 ],
+    //             ]
+    //         ]);
+
+    //         // if (is_wp_error($response)) {
+    //         //     return new WP_Error(
+    //         //         'payselection_error_cancel_subscription',
+    //         //         sprintf(__('The recurring subsciption cancelling request returned unexpected result. We cannot cancel the recurring subscription automatically. Error: %s', 'leyka'), $response->get_error_message())
+    //         //     );
+    //         // }
+    //     }
+    // }
 
     protected function _require_lib() {
         require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Merchant_Api.php';

@@ -21,8 +21,8 @@ class Payselection_Merchant_Api
     {
         $this->site_id = $site_id;
         $this->secret_key = $secret_key;
-        $this->host = $host;
-        $this->create_host = $create_host;
+        $this->host = untrailingslashit(esc_url($host));
+        $this->create_host = untrailingslashit(esc_url($create_host));
     }
 
     // public function __get($name)
