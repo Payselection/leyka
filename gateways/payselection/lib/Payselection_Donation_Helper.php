@@ -21,9 +21,9 @@ class Payselection_Donation_Helper {
 
         
 
-        // if( empty($donation->payselection_transaction_id)  ) {
-        //     return;
-        // }
+        if(!$donation->payselection_transaction_id) {
+            return;
+        }
 
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
@@ -31,12 +31,16 @@ class Payselection_Donation_Helper {
             leyka_options()->opt('payselection_host'),
             leyka_options()->opt('payselection_create_host')
         );
-        $response = $api->refund([
+
+        $data = [
             'TransactionId' => $donation->payselection_transaction_id,
             'Amount' => number_format(floatval($donation->amount), 2, '.', ''),
             'Currency' => strtoupper($donation->currency),
-            'WebhookUrl' => home_url('/leyka/service/payselection/process'),
-            'ReceiptData' => [
+            'WebhookUrl' => home_url('/leyka/service/payselection/process'),   
+        ];
+
+        if (leyka_options()->opt('payselection_receipt')) {
+            $data['ReceiptData'] = [
                 'timestamp' => date('d.m.Y H:i:s'),
                 'external_id' => (string) $donation->id,
                 'receipt' => [
@@ -61,8 +65,10 @@ class Payselection_Donation_Helper {
                     ],
                     'total' => number_format(floatval($donation->amount), 2, '.', ''),
                 ],
-            ]
-        ]);
+            ];
+        }
+
+        $response = $api->refund($data);
 
         $file = get_template_directory() . '/payselection-errors2.txt'; 
         $current = file_get_contents($file);

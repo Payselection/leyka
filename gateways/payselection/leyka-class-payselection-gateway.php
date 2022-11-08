@@ -121,6 +121,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     public function is_setup_complete($pm_id = false) {
         return leyka_options()->opt('payselection_host')
+            && leyka_options()->opt('payselection_create_host')
             && leyka_options()->opt('payselection_site_id')
             && leyka_options()->opt('payselection_key');
     }
@@ -206,7 +207,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'donation_id' => $donation_id,
             'amount' => number_format(floatval($donation->amount), 2, '.', ''),
             'currency' => $currency,
-            'payment_title' => $donation->payment_title,
+            'payment_title' => esc_html($donation->payment_title),
             'success_page' => leyka_get_success_page_url(),
             'failure_page' => leyka_get_failure_page_url(),
         ];
@@ -214,8 +215,8 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $extraData = [
             'WebhookUrl'    => home_url('/leyka/service/payselection/process'),
             'SuccessUrl'    => leyka_get_success_page_url(),
-            'CancelUrl'     => $campaign->url,
-            'DeclineUrl'    => $campaign->url,
+            'CancelUrl'     => esc_url($campaign->url),
+            'DeclineUrl'    => esc_url($campaign->url),
             'FailUrl'       => leyka_get_failure_page_url(),
         ];
 
@@ -268,11 +269,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             ];
         }
 
-        if($donation->additional_fields) {
-            $response['additional_fields'] = $donation->additional_fields;
-        }
+        // if($donation->additional_fields) {
+        //     $response['additional_fields'] = $donation->additional_fields;
+        // }
 
-        $this->_require_lib();
+        //$this->_require_lib();
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
             leyka_options()->opt('payselection_key'),
@@ -523,21 +524,25 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             return false;
         }
 
-        $this->_require_lib();
+        //$this->_require_lib();
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
             leyka_options()->opt('payselection_key'),
             leyka_options()->opt('payselection_host'),
             leyka_options()->opt('payselection_create_host')
         );
-        $response = $api->rebill([
+        $data = [
             'OrderId' => $new_recurring_donation->id,
             'Amount' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
             'Currency' => $new_recurring_donation->currency,
             'RebillId' => $new_recurring_donation->payselection_recurring_id,
             'PayOnlyFlag' => true,
             'WebhookUrl' => home_url('/leyka/service/payselection/process'),
-            'ReceiptData' => [
+            
+        ];
+        
+        if (leyka_options()->opt('payselection_receipt')) {
+            $data['ReceiptData'] = [
                 'timestamp' => date('d.m.Y H:i:s'),
                 'external_id' => (string) $new_recurring_donation->id,
                 'receipt' => [
@@ -562,15 +567,17 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                     ],
                     'total' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
                 ],
-            ]
-        ]);
+            ];
+        }
+
+        $response = $api->rebill($data);
+
         if (is_wp_error($response)) {
             $this->_handle_donation_failure($new_recurring_donation, $api);
-            return new WP_Error(
-                'payselection_error_subscription',
-                sprintf(__('The recurring subsciption payment request returned unexpected result. Error: %s', 'leyka'), $response->get_error_message())
-            );
+            return false;
         }
+
+        $new_recurring_donation->add_gateway_response($response);
 
         $new_recurring_donation->status = 'funded';
         Leyka_Donation_Management::send_all_emails($new_recurring_donation->id);
@@ -596,7 +603,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             return new WP_Error('payselection_no_subscription_id', sprintf(__('<strong>Error:</strong> unknown Subscription ID for donation #%d. We cannot cancel the recurring subscription automatically.<br><br>Please, email abount this to the <a href="%s" target="_blank">website tech. support</a>.<br>We are very sorry for inconvenience.', 'leyka'), $donation->id, leyka_get_website_tech_support_email()));
         }
 
-        $this->_require_lib();
+        //$this->_require_lib();
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
             leyka_options()->opt('payselection_key'),
@@ -834,9 +841,9 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     }
 
-    protected function _require_lib() {
-        require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Merchant_Api.php';
-    }
+    // protected function _require_lib() {
+    //     require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Merchant_Api.php';
+    // }
 
 }
 
