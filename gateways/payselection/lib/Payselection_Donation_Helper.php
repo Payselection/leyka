@@ -31,12 +31,10 @@ class Payselection_Donation_Helper {
             leyka_options()->opt('payselection_host'),
             leyka_options()->opt('payselection_create_host')
         );
-        $response = $api->rebill([
-            'OrderId' => $donation->id,
+        $response = $api->refund([
+            'TransactionId' => $donation->payselection_transaction_id,
             'Amount' => number_format(floatval($donation->amount), 2, '.', ''),
-            'Currency' => $donation->currency,
-            'RebillId' => $donation->payselection_recurring_id,
-            'PayOnlyFlag' => true,
+            'Currency' => strtoupper($donation->currency),
             'WebhookUrl' => home_url('/leyka/service/payselection/process'),
             'ReceiptData' => [
                 'timestamp' => date('d.m.Y H:i:s'),
@@ -65,40 +63,8 @@ class Payselection_Donation_Helper {
                 ],
             ]
         ]);
-        // $response = $api->refund([
-        //     'TransactionId' => $donation->payselection_transaction_id,
-        //     'Amount' => number_format(floatval($donation->amount), 2, '.', ''),
-        //     'Currency' => strtoupper($donation->currency),
-        //     'WebhookUrl' => home_url('/leyka/service/payselection/process'),
-        //     'ReceiptData' => [
-        //         'timestamp' => date('d.m.Y H:i:s'),
-        //         'external_id' => (string) $donation->id,
-        //         'receipt' => [
-        //             'client' => [
-        //                 'name' => $donation->donor_name,
-        //                 'email' => $donation->donor_email,
-        //             ],
-        //             'company' => [
-        //                 'inn' => '',
-        //                 'payment_address' => '',
-        //             ],
-        //             'items' => [
-        //                 'name' => 'donation',
-        //                 'price' => number_format(floatval($donation->amount), 2, '.', ''),
-        //                 'quantity' => '1',
-        //                 'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-        //                 'vat' => ''
-        //             ],
-        //             'payments' => [
-        //                 'type' => 1,
-        //                 'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-        //             ],
-        //             'total' => number_format(floatval($donation->amount), 2, '.', ''),
-        //         ],
-        //     ]
-        // ]);
 
-        $file = LEYKA_PLUGIN_DIR . 'lib/payselection-errors2.txt'; 
+        $file = get_template_directory() . '/payselection-errors2.txt'; 
         $current = file_get_contents($file);
         if (is_wp_error($response)) {
             $current .= $response->get_error_message() 
