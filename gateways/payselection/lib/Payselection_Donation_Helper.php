@@ -58,7 +58,7 @@ class Payselection_Donation_Helper {
                         'vat' => 'none'
                     ],
                     'payments' => [
-                        'type' => 1,
+                        'type' => 0,
                         'sum' => number_format(floatval($donation->amount), 2, '.', ''),
                     ],
                     'total' => number_format(floatval($donation->amount), 2, '.', ''),
