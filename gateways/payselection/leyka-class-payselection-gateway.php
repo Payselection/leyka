@@ -369,57 +369,109 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         }
 
-        if ('Fail' === $response['Event']) { // Payment failed
-
-            $new_status = 'failed';
-
-            // Emails will be sent only if respective options are on:
-            Leyka_Donation_Management::send_error_notifications($donation);
-
-        } elseif (!empty($response['RebillId'])) { // Recurring
-
-            if(time() - $donation->date_timestamp >= 60*60*24*3) { // More than 3 days passed, so it's a rebill callback
-
-                // $donation = Leyka_Donations::get_instance()->add_clone(
-                //     $donation,
-                //     [
-                //         'init_recurring_donation' => $donation->id,
-                //         'date' => '' // don't copy the date
-                //     ],
-                //     ['recalculate_total_amount' => true,]
-                // );
-
-                // if(is_wp_error($donation)) {
-                //     exit(200);
-                // }
-
-            } else { // Recurring subscription callback
-
-                $new_status = 'funded';
-                $donation->payment_type = 'rebill';
-
+        if($donation->is_init_recurring_donation) { // Recurring subscription
+           
+            switch($response['Event']) {
+                case 'Fail': 
+                    $new_status = 'failed'; 
+                    $donation->recurring_is_active = false;
+                    // Emails will be sent only if respective options are on:
+                    Leyka_Donation_Management::send_error_notifications($donation);
+                    break;
+                case 'Payment': 
+                    $new_status = 'funded';
+                    break;
+                case 'Refund': 
+                    $new_status = 'refunded'; 
+                    break;
+                default:
+                    $new_status = 'submitted';
             }
 
-            // if( !empty($data['card_token']) ) {
-
-            //     $donation->recurring_id = $data['order_id'];
-            //     $donation->liqpay_order_id = $data['liqpay_order_id'];
-            //     $donation->card_token = $data['card_token'];
-
-            // }
+        } else if($donation->type === 'rebill') { // Non-init recurring donation
+           
+            switch($response['Event']) {
+                case 'Fail': 
+                    $new_status = 'failed'; 
+                    // Emails will be sent only if respective options are on:
+                    Leyka_Donation_Management::send_error_notifications($donation);
+                    break;
+                case 'Payment': 
+                    $new_status = 'funded';
+                    $donation->recurring_is_active = true; 
+                    break;
+                case 'Refund': 
+                    $new_status = 'refunded'; 
+                    break;
+                default:
+                    $new_status = 'submitted';
+            }
 
             do_action('leyka_new_rebill_donation_added', $donation);
 
         } else { // Single donation
-
+            
             switch($response['Event']) {
-                case 'Payment': $new_status = 'funded'; break;
-                case 'Refund': $new_status = 'refunded'; break;
+                case 'Fail': 
+                    $new_status = 'failed'; 
+                    // Emails will be sent only if respective options are on:
+                    Leyka_Donation_Management::send_error_notifications($donation);
+                    break;
+                case 'Payment': 
+                    $new_status = 'funded'; 
+                    break;
+                case 'Refund': 
+                    $new_status = 'refunded'; 
+                    break;
                 default:
                     $new_status = 'submitted';
             }
 
         }
+
+        // if ('Fail' === $response['Event']) { // Payment failed
+
+        //     $new_status = 'failed';
+
+        //     // Emails will be sent only if respective options are on:
+        //     Leyka_Donation_Management::send_error_notifications($donation);
+
+        // } elseif (!empty($response['RebillId'])) { // Recurring
+
+        //     if(time() - $donation->date_timestamp >= 60*60*24*3) { // More than 3 days passed, so it's a rebill callback
+
+        //         // $donation = Leyka_Donations::get_instance()->add_clone(
+        //         //     $donation,
+        //         //     [
+        //         //         'init_recurring_donation' => $donation->id,
+        //         //         'date' => '' // don't copy the date
+        //         //     ],
+        //         //     ['recalculate_total_amount' => true,]
+        //         // );
+
+        //         // if(is_wp_error($donation)) {
+        //         //     exit(200);
+        //         // }
+
+        //     } else { // Recurring subscription callback
+
+        //         $new_status = 'funded';
+        //         $donation->payment_type = 'rebill';
+
+        //     }
+
+        //     do_action('leyka_new_rebill_donation_added', $donation);
+
+        // } else { // Single donation
+
+        //     switch($response['Event']) {
+        //         case 'Payment': $new_status = 'funded'; break;
+        //         case 'Refund': $new_status = 'refunded'; break;
+        //         default:
+        //             $new_status = 'submitted';
+        //     }
+
+        // }
 
         $donation->add_gateway_response($response);
 

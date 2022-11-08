@@ -39,8 +39,7 @@ class Payselection_Donation_Helper {
 
         if (leyka_options()->opt('payselection_receipt')) {
             $data['ReceiptData'] = [
-                //'timestamp' => date('d.m.Y H:i:s'),
-                'timestamp' => $donation->date_timestamp,
+                'timestamp' => date('d.m.Y H:i:s'),
                 'external_id' => (string) $donation->id,
                 'receipt' => [
                     'client' => [
