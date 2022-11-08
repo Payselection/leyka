@@ -19,8 +19,6 @@ class Payselection_Donation_Helper {
 
     public function create_refund(Leyka_Donation_Base $donation) {
 
-        
-
         if(!$donation->payselection_transaction_id) {
             return;
         }
@@ -57,7 +55,7 @@ class Payselection_Donation_Helper {
                         'price' => number_format(floatval($donation->amount), 2, '.', ''),
                         'quantity' => '1',
                         'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                        'vat' => ''
+                        'vat' => 'none'
                     ],
                     'payments' => [
                         'type' => 1,
@@ -76,7 +74,8 @@ class Payselection_Donation_Helper {
             $current .= $response->get_error_message() 
             ."\n".$donation->payselection_transaction_id."\n"
             ."\n".number_format(floatval($donation->amount), 2, '.', '')."\n"
-            ."\n".strtoupper($donation->currency)."\n";
+            ."\n".strtoupper($donation->currency)."\n"
+            ."\n".json_encode($data['ReceiptData'])."\n";
         } else {
             $current .= $response ."\n";
         }

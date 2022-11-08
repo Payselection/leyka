@@ -700,7 +700,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             __('Donor email:', 'leyka') => $this->_get_value_if_any($vars, 'Email'),
             __('Callback time:', 'leyka') => $this->_get_value_if_any($vars, 'DateTime'),
             __('Donation description:', 'leyka') => $this->_get_value_if_any($vars, 'Description'),
-            __('Is test donation:', 'leyka') => $this->_get_value_if_any($vars, 'IsTest'),
             __('Invoice status:', 'leyka') => $this->_get_value_if_any($vars, 'Event'),
         ];
 
@@ -788,7 +787,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             </div>
 
         <?php }
-
+        
     }
 
     public function get_specific_data_value($value, $field_name, Leyka_Donation_Base $donation) {
@@ -819,11 +818,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     public function save_donation_specific_data(Leyka_Donation_Base $donation) {
 
-        if(isset($_POST['payselection-recurring-id']) && $donation->recurring_id != $_POST['payselection-recurring-id']) {
+        if(isset($_POST['payselection-recurring-id']) && $donation->payselection_recurring_id != $_POST['payselection-recurring-id']) {
             $donation->payselection_recurring_id = $_POST['payselection-recurring-id'];
         }
 
-        if(isset($_POST['payselection-transaction-id']) && $donation->transaction_id != $_POST['payselection-transaction-id']) {
+        if(isset($_POST['payselection-transaction-id']) && $donation->payselection_transaction_id != $_POST['payselection-transaction-id']) {
             $donation->payselection_transaction_id = $_POST['payselection-transaction-id'];
         }
 
