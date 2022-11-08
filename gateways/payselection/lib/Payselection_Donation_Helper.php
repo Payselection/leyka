@@ -51,17 +51,17 @@ class Payselection_Donation_Helper {
                         'payment_address' => '',
                     ],
                     'items' => [
-                        'name' => 'donation',
-                        'price' => number_format(floatval($donation->amount), 2, '.', ''),
+                        'name' => 'donation refund',
+                        'price' => 0,
                         'quantity' => '1',
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                        'sum' => 0,
                         'vat' => 'none'
                     ],
                     'payments' => [
                         'type' => 0,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                        'sum' => 0,
                     ],
-                    'total' => number_format(floatval($donation->amount), 2, '.', ''),
+                    'total' => 0,
                 ],
             ];
         }
