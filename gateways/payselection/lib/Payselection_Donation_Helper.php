@@ -38,7 +38,7 @@ class Payselection_Donation_Helper {
         // ];
 
         $data = [
-            'OrderId' => $donation->id,
+            'OrderId' => implode('-',[$donation->id, leyka_options()->opt('payselection_site_id'), time()]),
             'RebillId' => $donation->payselection_recurring_id,
             'Amount' => number_format(floatval($donation->amount), 2, '.', ''),
             'Currency' => strtoupper($donation->currency),

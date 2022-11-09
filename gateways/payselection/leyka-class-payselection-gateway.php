@@ -595,7 +595,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             leyka_options()->opt('payselection_create_host')
         );
         $data = [
-            'OrderId' => $new_recurring_donation->id,
+            'OrderId' => implode('-',[$new_recurring_donation->id, leyka_options()->opt('payselection_site_id'), time()]),
             'Amount' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
             'Currency' => $new_recurring_donation->currency,
             'RebillId' => $new_recurring_donation->payselection_recurring_id,
