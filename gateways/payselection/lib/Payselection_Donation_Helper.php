@@ -46,6 +46,35 @@ class Payselection_Donation_Helper {
             'WebhookUrl' => home_url('/leyka/service/payselection/process'),   
         ];
 
+        // if (leyka_options()->opt('payselection_receipt')) {
+        //     $data['ReceiptData'] = [
+        //         'timestamp' => date('d.m.Y H:i:s'),
+        //         'external_id' => (string) $donation->id,
+        //         'receipt' => [
+        //             'client' => [
+        //                 'name' => $donation->donor_name,
+        //                 'email' => $donation->donor_email,
+        //             ],
+        //             'company' => [
+        //                 'inn' => '',
+        //                 'payment_address' => '',
+        //             ],
+        //             'items' => [
+        //                 'name' => 'donation refund',
+        //                 'price' => 0,
+        //                 'quantity' => 1,
+        //                 'sum' => 0,
+        //                 'vat' => 'none'
+        //             ],
+        //             'payments' => [
+        //                 'type' => 0,
+        //                 'sum' => 0,
+        //             ],
+        //             'total' => 0,
+        //         ],
+        //     ];
+        // }
+
         if (leyka_options()->opt('payselection_receipt')) {
             $data['ReceiptData'] = [
                 'timestamp' => date('d.m.Y H:i:s'),
@@ -60,17 +89,17 @@ class Payselection_Donation_Helper {
                         'payment_address' => '',
                     ],
                     'items' => [
-                        'name' => 'donation refund',
-                        'price' => 0,
+                        'name' => 'donation',
+                        'price' => number_format(floatval($donation->amount), 2, '.', ''),
                         'quantity' => 1,
-                        'sum' => 0,
+                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
                         'vat' => 'none'
                     ],
                     'payments' => [
-                        'type' => 0,
-                        'sum' => 0,
+                        'type' => 1,
+                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
                     ],
-                    'total' => 0,
+                    'total' => number_format(floatval($donation->amount), 2, '.', ''),
                 ],
             ];
         }
