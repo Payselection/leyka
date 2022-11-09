@@ -380,7 +380,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             case 'Payment': 
                 $new_status = 'funded'; 
                 if (!empty($response['RebillId'])) {
-                    if (!$donation->is_init_recurring_donation) {
+                    if (empty($donation->payselection_recurring_id)) {
                         $donation->recurring_is_active = true;
                     }
                     do_action('leyka_new_rebill_donation_added', $donation);
