@@ -62,7 +62,7 @@ class Payselection_Donation_Helper {
                     'items' => [
                         'name' => 'donation refund',
                         'price' => 0,
-                        'quantity' => '1',
+                        'quantity' => 1,
                         'sum' => 0,
                         'vat' => 'none'
                     ],
