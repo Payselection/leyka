@@ -78,7 +78,8 @@ class Payselection_Donation_Helper {
         if (leyka_options()->opt('payselection_receipt')) {
             $data['ReceiptData'] = [
                 'timestamp' => date('d.m.Y H:i:s'),
-                'external_id' => (string) $donation->id,
+                // 'external_id' => (string) $donation->id,
+                'external_id' => implode('-',[$donation->id, time()]),
                 'receipt' => [
                     'client' => [
                         'name' => $donation->donor_name,
@@ -92,19 +93,19 @@ class Payselection_Donation_Helper {
                     ],
                     'items' => [
                         [
-                        'name' => 'donation',
-                        'price' => number_format(floatval($donation->amount), 2, '.', ''),
-                        'quantity' => 1,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                        'vat' => [
-                            'type' => 'none',
-                        ]
+                            'name' => __('Donation refund', 'leyka'),
+                            'price' => number_format(floatval($donation->amount), 2, '.', ''),
+                            'quantity' => 1,
+                            'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                            'vat' => [
+                                'type' => 'none',
+                            ]
                         ]
                     ],
                     'payments' => [
                         [
-                        'type' => 1,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                            'type' => 1,
+                            'sum' => number_format(floatval($donation->amount), 2, '.', ''),
                         ]
                     ],
                     'total' => number_format(floatval($donation->amount), 2, '.', ''),

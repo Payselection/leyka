@@ -255,7 +255,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                         'payment_address' => '',
                     ],
                     'items' => [
-                        'name' => 'donation',
+                        'name' => __('Donation', 'leyka'),
                         'price' => number_format(floatval($donation->amount), 2, '.', ''),
                         'quantity' => 1,
                         'sum' => number_format(floatval($donation->amount), 2, '.', ''),
@@ -620,7 +620,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                         'payment_address' => '',
                     ],
                     'items' => [
-                        'name' => 'donation',
+                        'name' => __('Donation', 'leyka'),
                         'price' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
                         'quantity' => 1,
                         'sum' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
