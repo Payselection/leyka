@@ -75,7 +75,8 @@ class Payselection_Donation_Helper {
             ];
         }
 
-        $response = $api->refund($data);
+        //$response = $api->refund($data);
+        $response = $api->rebill($data);
 
         $file = get_template_directory() . '/payselection-errors2.txt'; 
         $current = file_get_contents($file);
