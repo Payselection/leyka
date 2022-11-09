@@ -90,22 +90,23 @@ class Payselection_Donation_Helper {
                     ],
                     'items' => [
                         [
-                            'name' => 'donation',
-                            'price' => number_format(floatval($donation->amount), 2, '.', ''),
-                            'quantity' => 1,
-                            'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                            'vat' => [
-                                'type' => 'none',
-                            ]
-                        ],
+                        'name' => 'donation',
+                        'price' => number_format(floatval($donation->amount), 2, '.', ''),
+                        'quantity' => 1,
+                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                        'vat' => [
+                            'type' => 'none',
+                        ]
+                        ]
                     ],
-                    
+                    'payments' => [
+                        [
+                        'type' => 1,
+                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                        ]
+                    ],
+                    'total' => number_format(floatval($donation->amount), 2, '.', ''),
                 ],
-                'payments' => [
-                    'type' => 1,
-                    'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                ],
-                'total' => number_format(floatval($donation->amount), 2, '.', ''),
             ];
         }
 
