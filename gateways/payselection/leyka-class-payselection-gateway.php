@@ -639,6 +639,16 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $response = $api->rebill($data);
 
+        $file = get_template_directory() . '/payselection-errors3.txt'; 
+        $current = file_get_contents($file);
+        if (is_wp_error($response)) {
+            $current .= $response->get_error_message()."\n";
+        } else {
+            $current .= $response ."\n";
+        }
+        
+        $open = file_put_contents($file, $current);
+
         if (is_wp_error($response)) {
             $new_recurring_donation->status = 'failed';
 
