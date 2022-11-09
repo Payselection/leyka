@@ -85,8 +85,8 @@ class Payselection_Donation_Helper {
                         'email' => $donation->donor_email,
                     ],
                     'company' => [
-                        'inn' => '',
-                        'payment_address' => '',
+                        'inn' => '111',
+                        'payment_address' => 'ffd',
                     ],
                     'items' => [
                         [
@@ -99,12 +99,13 @@ class Payselection_Donation_Helper {
                             ]
                         ],
                     ],
-                    'payments' => [
-                        'type' => 1,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                    ],
-                    'total' => number_format(floatval($donation->amount), 2, '.', ''),
+                    
                 ],
+                'payments' => [
+                    'type' => 1,
+                    'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                ],
+                'total' => number_format(floatval($donation->amount), 2, '.', ''),
             ];
         }
 
