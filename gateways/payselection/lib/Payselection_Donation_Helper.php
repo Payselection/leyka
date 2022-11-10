@@ -108,7 +108,7 @@ class Payselection_Donation_Helper {
                             'sum' => floatval(number_format($donation->amount), 2, '.', ''),
                         ]
                     ],
-                    'total' => floatval(umber_format($donation->amount), 2, '.', ''),
+                    'total' => floatval(number_format($donation->amount), 2, '.', ''),
                 ],
             ];
         }
