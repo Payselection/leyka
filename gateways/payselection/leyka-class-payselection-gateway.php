@@ -245,11 +245,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             $response['request']['ReceiptData'] = $this->_get_payselection_receipt($donation, __('Donation', 'leyka'));
         }
 
-        // if($donation->additional_fields) {
-        //     $response['additional_fields'] = $donation->additional_fields;
-        // }
-
-        //$this->_require_lib();
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
             leyka_options()->opt('payselection_key'),
@@ -266,6 +261,23 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     }
 
+    protected function _handle_callback_error($error_message = '', Leyka_Donation_Base $donation = null) {
+
+        if($donation) {
+    
+            $_POST['failure_reason'] = $error_message;
+    
+            $donation->add_gateway_response($_POST);
+            $donation->status = 'failed';
+    
+            if($donation->is_init_recurring_donation) {
+                $donation->recurring_is_active = false;
+            }
+    
+        }
+    
+    }
+
     public function _handle_service_calls($call_type = '') {
         // Callback URLs are: some-website.org/leyka/service/payselection/process/
         // Request content should contain "Event" field.
@@ -279,6 +291,15 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $open = file_put_contents($file, $current);
 
         $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
+
+        $response = [];
+        try {
+
+            $response = json_decode($data, true);
+
+        } catch(\Exception $ex) {
+            error_log($ex);
+        }
 
         if (is_wp_error($check)) {
 
@@ -298,23 +319,14 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
             }
 
-            // $donation->add_gateway_response($_POST);
-            // $donation->status = 'failed';
+            $this->_handle_callback_error($check->get_error_message, $donation);
 
             die();
 
         } 
 
-        $response = [];
-        try {
-
-            $response = json_decode($data, true);
-
-        } catch(\Exception $ex) {
-            error_log($ex);
-        }
-
         if(empty($response['Event']) || !is_string($response['Event'])) {
+            $this->_handle_callback_error(__('Webhook error: Event field is not found or have incorrect value', 'leyka'), $donation);
             wp_die(__('Webhook error: Event field is not found or have incorrect value', 'leyka'));
         }
 
@@ -562,7 +574,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             return false;
         }
 
-        //$this->_require_lib();
         $api = new \Payselection_Merchant_Api(
             leyka_options()->opt('payselection_site_id'),
             leyka_options()->opt('payselection_key'),
@@ -597,6 +608,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         if (is_wp_error($response)) {
             $new_recurring_donation->status = 'failed';
+            $new_recurring_donation->add_gateway_response($response);
 
             Leyka_Donation_Management::send_error_notifications($new_recurring_donation); // Emails will be sent only if respective options are on
 
@@ -689,8 +701,13 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         if( !empty($vars['ErrorMessage']) ) {
             $vars_final[__('Donation failure reason:', 'leyka')] = $vars['ErrorMessage'];
         }
-        if( !empty($vars['RebillId']) ) {
+
+        if( !empty($vars['RebillId']) && $donation->type === 'rebill' ) {
             $vars_final[__('Recurrent subscription ID:', 'leyka')] = $this->_get_value_if_any($vars, 'RebillId');
+        }
+
+        if( !empty($vars['failure_reason']) && $donation->status === 'failed' ) {
+            $vars_final[__('Donation failure reason:', 'leyka')] = $vars['ErrorMessage'] . '.  ' .$this->_get_value_if_any($vars, 'failure_reason');
         }
 
         return $vars_final;
