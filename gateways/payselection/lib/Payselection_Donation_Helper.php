@@ -86,10 +86,8 @@ class Payselection_Donation_Helper {
                         'email' => $donation->donor_email,
                     ],
                     'company' => [
-                        'email' => 'example@mail.com',
-                        'inn' => '123',
-                        'sno' => 'osn',
-                        'payment_address' => 'usa',
+                        'inn' => leyka_options()->opt('leyka_org_inn'),
+                        'payment_address' => leyka_options()->opt('leyka_org_address'),
                     ],
                     'items' => [
                         [
@@ -97,6 +95,8 @@ class Payselection_Donation_Helper {
                             'price' => number_format(floatval($donation->amount), 2, '.', ''),
                             'quantity' => 1,
                             'sum' => number_format(floatval($donation->amount), 2, '.', ''),
+                            'payment_method' => 'full_prepayment',
+                            'payment_object'=> 'commodity',
                             'vat' => [
                                 'type' => 'none',
                             ]

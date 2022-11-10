@@ -24,9 +24,6 @@
             return; /** @todo Add some error to the form! Or at least do some console.logging */
         }
 
-        console.log('$pm_field.length = '+$pm_field.length);
-                console.log('gateway_is_chosen = '+gateway_is_chosen);
-
         let $revo_redirect_step = $form.closest('.leyka-pf').find('.leyka-pf__redirect');
         if($revo_redirect_step.length) {
             $revo_redirect_step.addClass('leyka-pf__redirect--open');
@@ -55,8 +52,6 @@
             data[data_array[i].name] = data_array[i].value;
         }
 
-        console.log(data);
-
         e.preventDefault();
 
         $.ajax({
@@ -67,8 +62,6 @@
                 /** @todo Show some loader */
             }
         }).done(function(response){
-
-            console.log(response);
 
             $form.data('submit-in-process', 0);
 
@@ -115,29 +108,17 @@
             if (response.payselection_method == 'widget') {
                 const widget = new pw.PayWidget();
 
-                if(response.additional_fields && !$.isEmptyObject(response.additional_fields)) {
-                    $.each(response.additional_fields, function(key, value){
-                        data[key] = value;
-                    });
-                }
-
-                // if(is_recurring) {
-                //     data.cloudPayments = {recurrent: {interval: 'Month', period: 1}};
-                // }
-
                 widget.pay({
                     serviceId: response.site_id,
                     key: response.widget_key
                 }, response.request, {
                     onSuccess: (res) => {
-                        console.log("onSuccess from shop", res);
-                        //window.location.href = response.success_page;
-                        // $errors.html('').hide();
+                        $errors.html('').hide();
+                        window.location.href = response.success_page;
                     },
                     onError: (res) => {
-                        console.log("onFail from shop", res);
-                        //addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
-                        //window.location.href = response.failure_page;
+                        addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
+                        window.location.href = response.failure_page;
                     },
                     onClose: () => {
                     }
@@ -149,8 +130,6 @@
                     window.location.href = response.payselection_redirect_url;
                 }
             }
-
-            console.log(response.request);
             
             if($revo_redirect_step.length) {
                 $revo_redirect_step.removeClass('leyka-pf__redirect--open');
