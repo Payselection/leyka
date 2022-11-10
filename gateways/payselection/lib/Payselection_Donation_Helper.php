@@ -92,9 +92,9 @@ class Payselection_Donation_Helper {
                     'items' => [
                         [
                             'name' => __('Donation refund', 'leyka'),
-                            'price' => floatval(number_format($donation->amount), 2, '.', ''),
+                            'price' => (float) number_format(floatval($donation->amount), 2, '.', ''),
                             'quantity' => 1,
-                            'sum' => floatval(number_format($donation->amount), 2, '.', ''),
+                            'sum' => (float) number_format(floatval($donation->amount), 2, '.', ''),
                             'payment_method' => 'full_prepayment',
                             'payment_object'=> 'commodity',
                             'vat' => [
@@ -105,10 +105,10 @@ class Payselection_Donation_Helper {
                     'payments' => [
                         [
                             'type' => 1,
-                            'sum' => floatval(number_format($donation->amount), 2, '.', ''),
+                            'sum' => (float) number_format(floatval($donation->amount), 2, '.', ''),
                         ]
                     ],
-                    'total' => floatval(number_format($donation->amount), 2, '.', ''),
+                    'total' => (float) number_format(floatval($donation->amount), 2, '.', ''),
                 ],
             ];
         }
