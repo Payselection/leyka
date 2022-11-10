@@ -86,10 +86,10 @@ class Payselection_Donation_Helper {
                         'email' => $donation->donor_email,
                     ],
                     'company' => [
-                        'email' => '',
-                        'inn' => '',
-                        'sno' => '',
-                        'payment_address' => '',
+                        'email' => 'example@mail.com',
+                        'inn' => '123',
+                        'sno' => 'osn',
+                        'payment_address' => 'usa',
                     ],
                     'items' => [
                         [
