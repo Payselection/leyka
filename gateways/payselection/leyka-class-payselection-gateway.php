@@ -242,34 +242,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         ];
 
         if (leyka_options()->opt('payselection_receipt')) {
-            $response['request']['ReceiptData'] = [
-                'timestamp' => date('d.m.Y H:i:s'),
-                'external_id' => (string) $donation_id,
-                'receipt' => [
-                    'client' => [
-                        'name' => $donation->donor_name,
-                        'email' => $donation->donor_email,
-                    ],
-                    'company' => [
-                        'inn' => '',
-                        'payment_address' => '',
-                    ],
-                    'items' => [
-                        'name' => __('Donation', 'leyka'),
-                        'price' => number_format(floatval($donation->amount), 2, '.', ''),
-                        'quantity' => 1,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                        'vat' => [
-                            'type' => 'none',
-                        ]
-                    ],
-                    'payments' => [
-                        'type' => 1,
-                        'sum' => number_format(floatval($donation->amount), 2, '.', ''),
-                    ],
-                    'total' => number_format(floatval($donation->amount), 2, '.', ''),
-                ],
-            ];
+            $response['request']['ReceiptData'] = $this->_get_payselection_receipt($donation, __('Donation', 'leyka'));
         }
 
         // if($donation->additional_fields) {
@@ -607,34 +580,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         ];
         
         if (leyka_options()->opt('payselection_receipt')) {
-            $data['ReceiptData'] = [
-                'timestamp' => date('d.m.Y H:i:s'),
-                'external_id' => (string) $new_recurring_donation->id,
-                'receipt' => [
-                    'client' => [
-                        'name' => $new_recurring_donation->donor_name,
-                        'email' => $new_recurring_donation->donor_email,
-                    ],
-                    'company' => [
-                        'inn' => '',
-                        'payment_address' => '',
-                    ],
-                    'items' => [
-                        'name' => __('Donation', 'leyka'),
-                        'price' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
-                        'quantity' => 1,
-                        'sum' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
-                        'vat' => [
-                            'type' => 'none',
-                        ]
-                    ],
-                    'payments' => [
-                        'type' => 1,
-                        'sum' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
-                    ],
-                    'total' => number_format(floatval($new_recurring_donation->amount), 2, '.', ''),
-                ],
-            ];
+            $data['ReceiptData'] = $this->_get_payselection_receipt($new_recurring_donation, __('Donation rebill', 'leyka'));
         }
 
         $response = $api->rebill($data);
@@ -710,53 +656,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         return true;
 
     }
-
-    /**
-     * It is possible for CP to call a callback several times for one donation.
-     * This donation must be created only once and then updated. It can be identified with CP transaction id.
-     *
-     * @param $payselection_transaction_id integer
-     * @return Leyka_Donation_Base
-     */
-    // protected function _get_donation_by_transaction_id($payselection_transaction_id) {
-
-    //     $donation = Leyka_Donations::get_instance()->get([
-    //         'meta' => [['key' => 'payselection_transaction_id', 'value' => $payselection_transaction_id,],],
-    //         'get_single' => true,
-    //     ]);
-
-    //     if( !$donation ) {
-    //         $donation = Leyka_Donations::get_instance()->add([
-    //             'status' => 'submitted',
-    //             'gateway_id' => 'cp',
-    //             'payment_method_id' => 'card',
-    //             'payselection_transaction_id' => $payselection_transaction_id,
-    //             'force_insert' => true, // Turn off donation fields validation checks
-    //         ], true);
-    //     }
-
-    //     return $donation;
-
-    // }
-
-    // public function get_init_recurring_donation($recurring) {
-
-    //     if(is_a($recurring, 'Leyka_Donation_Base')) {
-    //         $recurring = $recurring->payselection_recurring_id;
-    //     }
-    //     if( !$recurring ) {
-    //         return false;
-    //     }
-
-    //     return Leyka_Donations::get_instance()->get([
-    //         'recurring_only_init' => true,
-    //         'get_single' => true,
-    //         'meta' => [['key' => 'payselection_recurring_id', 'value' => $recurring,]],
-    //         'orderby' => 'id',
-    //         'order' => 'asc',
-    //     ]);
-
-    // }
 
     protected function _get_value_if_any($arr, $key, $val = false) {
         return empty($arr[$key]) ? '' : ($val ? : $arr[$key]);
@@ -920,9 +819,42 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     }
 
-    // protected function _require_lib() {
-    //     require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Merchant_Api.php';
-    // }
+    protected function _get_payselection_receipt(Leyka_Donation_Base $donation, $title = '') {
+        return [
+            'timestamp' => date('d.m.Y H:i:s'),
+            'external_id' => implode('-',[$donation->id, time()]),
+            'receipt' => [
+                'client' => [
+                    'name' => $donation->donor_name,
+                    'email' => $donation->donor_email,
+                ],
+                'company' => [
+                    'inn' => leyka_options()->opt('leyka_org_inn'),
+                    'payment_address' => leyka_options()->opt('leyka_org_address'),
+                ],
+                'items' => [
+                    [
+                        'name' => $title,
+                        'price' => (float) number_format(floatval($donation->amount), 2, '.', ''),
+                        'quantity' => 1,
+                        'sum' => (float) number_format(floatval($donation->amount), 2, '.', ''),
+                        'payment_method' => 'full_prepayment',
+                        'payment_object'=> 'commodity',
+                        'vat' => [
+                            'type' => 'none',
+                        ]
+                    ]
+                ],
+                'payments' => [
+                    [
+                        'type' => 1,
+                        'sum' => (float) number_format(floatval($donation->amount), 2, '.', ''),
+                    ]
+                ],
+                'total' => (float) number_format(floatval($donation->amount), 2, '.', ''),
+            ],
+        ];
+    }
 
 }
 
