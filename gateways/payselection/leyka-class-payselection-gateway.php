@@ -590,8 +590,12 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             $vars_final[__('Remaining amount:', 'leyka')] = $vars['RemainingAmount'];
         }
 
-        if ($donation->status === 'failed' && (!empty($vars['ErrorMessage']) || !empty($vars['failure_reason']))) {
-            $vars_final[__('Donation failure reason:', 'leyka')] = $this->_get_value_if_any($vars, 'ErrorMessage') . '. ' . $this->_get_value_if_any($vars, 'failure_reason');
+        if ($donation->status === 'failed' && !empty($vars['ErrorMessage'])) {
+            $vars_final[__('Donation failure reason(Payselection):', 'leyka')] = $this->_get_value_if_any($vars, 'ErrorMessage');
+        }
+
+        if ($donation->status === 'failed' && !empty($vars['failure_reason'])) {
+            $vars_final[__('Donation failure reason(Leyka):', 'leyka')] = $this->_get_value_if_any($vars, 'failure_reason');
         }
 
         if ($donation->type === 'rebill' && !empty($vars['RebillId'])) {
