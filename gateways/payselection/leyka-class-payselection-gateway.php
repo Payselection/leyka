@@ -369,7 +369,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                     if (empty($donation->payselection_recurring_id)) {
                         $donation->recurring_is_active = true;
                     }
-                    do_action('leyka_new_rebill_donation_added', $donation);
                 }
                 break;
             case 'Refund': 
@@ -386,6 +385,10 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         if( !empty($response['RebillId']) ) {
             $donation->payselection_recurring_id = esc_sql($response['RebillId']);
+        }
+
+        if($donation->type === 'rebill') {
+            do_action('leyka_new_rebill_donation_added', $donation);
         }
 
         if(!empty($new_status) && $donation->status !== $new_status) {
@@ -481,7 +484,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'Currency' => $new_recurring_donation->currency,
             'RebillId' => $new_recurring_donation->payselection_recurring_id,
             'PayOnlyFlag' => true,
-            //'WebhookUrl' => home_url('/leyka/service/payselection/process'),
+            'WebhookUrl' => home_url('/leyka/service/payselection/process'),
             
         ];
         
@@ -501,19 +504,15 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         
         $open = file_put_contents($file, $current);
 
+        $new_recurring_donation->add_gateway_response($response);
+
         if (is_wp_error($response)) {
             $new_recurring_donation->status = 'failed';
-            $new_recurring_donation->add_gateway_response($response);
 
             Leyka_Donation_Management::send_error_notifications($new_recurring_donation); // Emails will be sent only if respective options are on
 
             return false;
         }
-
-        $new_recurring_donation->add_gateway_response($response);
-
-        $new_recurring_donation->status = 'funded';
-        Leyka_Donation_Management::send_all_emails($new_recurring_donation->id);
 
         return $new_recurring_donation;
 
@@ -579,29 +578,24 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         }
 
         $vars_final = [
+            __('Event:', 'leyka') => $this->_get_value_if_any($vars, 'Event'),
             __('Transaction ID:', 'leyka') => $this->_get_value_if_any($vars, 'TransactionId'),
-            __('Sum:', 'leyka') => $this->_get_value_if_any($vars, 'Amount'),
+            __('Amount:', 'leyka') => $this->_get_value_if_any($vars, 'Amount'),
             __('Currency:', 'leyka') => $this->_get_value_if_any($vars, 'Currency'),
-            __('Donor email:', 'leyka') => $this->_get_value_if_any($vars, 'Email'),
             __('Callback time:', 'leyka') => $this->_get_value_if_any($vars, 'DateTime'),
             __('Donation description:', 'leyka') => $this->_get_value_if_any($vars, 'Description'),
-            __('Invoice status:', 'leyka') => $this->_get_value_if_any($vars, 'Event'),
         ];
 
-        if( !empty($vars['RemainingAmount']) ) {
+        if ($donation->type === 'refund' && !empty($vars['RemainingAmount'])) {
             $vars_final[__('Remaining amount:', 'leyka')] = $vars['RemainingAmount'];
         }
 
-        if( !empty($vars['ErrorMessage']) ) {
-            $vars_final[__('Donation failure reason:', 'leyka')] = $vars['ErrorMessage'];
+        if ($donation->type === 'failed' && (!empty($vars['ErrorMessage']) || !empty($vars['failure_reason']))) {
+            $vars_final[__('Donation failure reason:', 'leyka')] = $this->_get_value_if_any($vars, 'ErrorMessage') . '. ' . $this->_get_value_if_any($vars, 'failure_reason');
         }
 
-        if( !empty($vars['RebillId']) && $donation->type === 'rebill' ) {
+        if ($donation->type === 'rebill' && !empty($vars['RebillId'])) {
             $vars_final[__('Recurrent subscription ID:', 'leyka')] = $this->_get_value_if_any($vars, 'RebillId');
-        }
-
-        if( !empty($vars['failure_reason']) && $donation->status === 'failed' ) {
-            $vars_final[__('Donation failure reason:', 'leyka')] = $vars['ErrorMessage'] . '.  ' .$this->_get_value_if_any($vars, 'failure_reason');
         }
 
         return $vars_final;
