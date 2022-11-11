@@ -586,11 +586,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             __('Donation description:', 'leyka') => $this->_get_value_if_any($vars, 'Description'),
         ];
 
-        if ($donation->type === 'refund' && !empty($vars['RemainingAmount'])) {
+        if ($donation->status === 'refund' && !empty($vars['RemainingAmount'])) {
             $vars_final[__('Remaining amount:', 'leyka')] = $vars['RemainingAmount'];
         }
 
-        if ($donation->type === 'failed' && (!empty($vars['ErrorMessage']) || !empty($vars['failure_reason']))) {
+        if ($donation->status === 'failed' && (!empty($vars['ErrorMessage']) || !empty($vars['failure_reason']))) {
             $vars_final[__('Donation failure reason:', 'leyka')] = $this->_get_value_if_any($vars, 'ErrorMessage') . '. ' . $this->_get_value_if_any($vars, 'failure_reason');
         }
 
