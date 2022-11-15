@@ -406,7 +406,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         do_action('leyka_new_rebill_donation_added', $donation);
 
         if ($donation->type === 'rebill') {
-            $init_donation = $donation->is_init_recurring_donation ? $donation : $donation->init_recurring_donation;
+            $init_recurring_donation = $donation->is_init_recurring_donation ? $donation : $donation->init_recurring_donation;
             $this->do_recurring_donation($init_recurring_donation);
         }
 
