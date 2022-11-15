@@ -3,8 +3,6 @@
  * Leyka_Payselection_Gateway class
  */
 
-require_once LEYKA_PLUGIN_DIR.'gateways/payselection/lib/Payselection_Donation_Helper.php';
-
 class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     protected static $_instance;

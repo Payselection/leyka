@@ -37,9 +37,6 @@
 
         // Donation form validation already passed in the main script (public.js)
 
-        let is_recurring = $form.find('.leyka-recurring').prop('checked') ||
-                           $form.find('.is-recurring-chosen').val() > 0; // For Revo template;
-
         const $_form = $form.clone(),
             currency = $('.section__fields.currencies a.active').data('currency');
 
