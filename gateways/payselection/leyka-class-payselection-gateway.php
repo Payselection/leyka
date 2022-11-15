@@ -369,8 +369,8 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                         $donation->recurring_is_active = true;
                     }
                 }
-                if (($donation->type === 'rebill' && $donation->is_init_recurring_donation)) {
-                    $donation->type === 'single';
+                if ($donation->type === 'rebill' && $donation->is_init_recurring_donation) {
+                    $donation->type = 'single';
                 }
                 break;
             case 'Refund': 
