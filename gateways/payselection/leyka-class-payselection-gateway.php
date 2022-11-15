@@ -25,7 +25,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $this->_description = apply_filters(
             'leyka_gateway_description',
-            __('<a href="https://payselection.com/">Payselection</a> is a Designer IT-solutions for the e-commerce market.', 'leyka'),
+            __('<a href="https://payselection.com/">Payselection</a> is a universal payment solution for online business.', 'leyka'),
             $this->_id
         );
 
@@ -359,7 +359,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         switch($response['Event']) {
             case 'Fail': 
                 $new_status = 'failed'; 
-                $donation->recurring_is_active = false;
                 // Emails will be sent only if respective options are on:
                 Leyka_Donation_Management::send_error_notifications($donation);
                 break;
@@ -379,19 +378,15 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $donation->add_gateway_response($response);
 
-        if( !empty($response['TransactionId']) ) {
+        if (!empty($response['TransactionId'])) {
             $donation->payselection_transaction_id = esc_sql($response['TransactionId']);
         }
 
-        if( !empty($response['RebillId']) ) {
+        if (!empty($response['RebillId'])) {
             $donation->payselection_recurring_id = esc_sql($response['RebillId']);
         }
 
-        if($donation->type === 'rebill') {
-            do_action('leyka_new_rebill_donation_added', $donation);
-        }
-
-        if(!empty($new_status) && $donation->status !== $new_status) {
+        if (!empty($new_status) && $donation->status !== $new_status) {
 
             $donation->status = $new_status;
 
@@ -400,12 +395,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                 Leyka_Donation_Management::send_all_emails($donation);
             }
 
-            if($new_status === 'funded') {
-
-                $this->_handle_ga_purchase_event($donation);
-
-            }
         }
+
+        $this->_handle_ga_purchase_event($donation);
+
+        do_action('leyka_new_rebill_donation_added', $donation);
 
     }
 
@@ -507,10 +501,8 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $new_recurring_donation->add_gateway_response($response);
 
         if (is_wp_error($response)) {
-            $new_recurring_donation->status = 'failed';
-
+            $this->_handle_callback_error(sprintf(__("Rebilling request to the Payselection couldn't be made due to some error.\n\nThe error: %s", 'leyka'), $response->get_error_message(), $new_recurring_donation));
             Leyka_Donation_Management::send_error_notifications($new_recurring_donation); // Emails will be sent only if respective options are on
-
             return false;
         }
 
@@ -779,7 +771,7 @@ class Leyka_Payselection_Card extends Leyka_Payment_Method {
 
         $this->_description = apply_filters(
             'leyka_pm_description',
-            __('<a href="//Payselection.ru/">Payselection</a> is a Designer IT-solutions for the e-commerce market. Every partner receives the most comprehensive set of key technical options allowing to create a customer-centric payment system on site or in mobile application. Partners are allowed to receive payments in roubles and in other world currencies.', 'leyka'),
+            __('<a href="https://payselection.com/">Payselection</a> is a universal payment solution for online business.', 'leyka'),
             $this->_id,
             $this->_gateway_id,
             $this->_category
