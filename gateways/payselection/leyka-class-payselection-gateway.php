@@ -55,7 +55,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'payselection_webhook' => [
                 'type' => 'static_text',
                 'title' => __('Webhook URL', 'leyka'),
-                'value' => home_url('/leyka/service/payselection/process'),
+                'value' => home_url('/leyka/service/payselection/response'),
             ],
             'payselection_host' => [
                 'type' => 'text',
@@ -67,7 +67,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'payselection_create_host' => [
                 'type' => 'text',
                 'title' => __('Create Payment host', 'leyka'),
-                'comment' => __('Leave blank if you dont know what you do.', 'leyka'),
+                'comment' => __('Hostname for create payment.', 'leyka'),
                 'required' => true,
                 'default' => 'https://webform.payselection.com',
             ],
@@ -212,7 +212,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         ];
 
         $extraData = [
-            'WebhookUrl'    => home_url('/leyka/service/payselection/process'),
+            'WebhookUrl'    => home_url('/leyka/service/payselection/response'),
             'SuccessUrl'    => leyka_get_success_page_url(),
             'CancelUrl'     => esc_url($campaign->url),
             'DeclineUrl'    => esc_url($campaign->url),
@@ -277,7 +277,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
     }
 
     public function _handle_service_calls($call_type = '') {
-        // Callback URLs are: some-website.org/leyka/service/payselection/process/
+        // Callback URLs are: some-website.org/leyka/service/payselection/response/
         // Request content should contain "Event" field.
         // Possible field values: Payment, Fail, Refund
 
@@ -403,7 +403,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $this->_handle_ga_purchase_event($donation);
 
-        do_action('leyka_new_rebill_donation_added', $donation);
+        if ($donation->type === 'rebill') {
+            do_action('leyka_new_rebill_donation_added', $donation);
+        }
+
+        exit(200);
 
     }
 
@@ -482,7 +486,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'Currency' => $new_recurring_donation->currency,
             'RebillId' => $new_recurring_donation->payselection_recurring_id,
             'PayOnlyFlag' => true,
-            'WebhookUrl' => home_url('/leyka/service/payselection/process'),
+            'WebhookUrl' => home_url('/leyka/service/payselection/response'),
             
         ];
         

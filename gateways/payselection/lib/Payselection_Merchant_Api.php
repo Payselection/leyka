@@ -189,7 +189,7 @@ class Payselection_Merchant_Api
         }
         
         // Check signature
-        $signBody = $_SERVER['REQUEST_METHOD'] . PHP_EOL . home_url('/leyka/service/payselection/process') . PHP_EOL . $site_id . PHP_EOL . $request;
+        $signBody = $_SERVER['REQUEST_METHOD'] . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . $request;
         $signCalculated = self::getSignature($signBody, $secret_key);
 
         if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
