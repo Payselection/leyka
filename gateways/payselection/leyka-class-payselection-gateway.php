@@ -93,14 +93,14 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             ],
             'payselection_widget_key' => [
                 'type' => 'text',
-                'title' => __('Widget Key', 'leyka'),
+                'title' => __('Public Key', 'leyka'),
                 'comment' => __('Your Widget Key on Payselection.', 'leyka'),
                 'required' => true,
                 'default' => '',
             ],
             'payselection_widget_language' => [
                 'type' => 'select',
-                'title' => __('Widget language', 'leyka'),
+                'title' => __('Language', 'leyka'),
                 'default' => 'en',
                 'list_entries' => [
                     'ru' => __('Russian', 'leyka'),
