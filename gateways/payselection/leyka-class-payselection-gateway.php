@@ -98,7 +98,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                 'required' => true,
                 'default' => '',
             ],
-            'payselection_widget_language' => [
+            'payselection_language' => [
                 'type' => 'select',
                 'title' => __('Language', 'leyka'),
                 'default' => 'en',
