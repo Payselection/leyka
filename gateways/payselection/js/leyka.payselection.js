@@ -115,7 +115,7 @@
                     },
                     onError: (res) => {
                         addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
-                        //window.location.href = response.failure_page;
+                        window.location.href = response.failure_page;
                     },
                     onClose: () => {
                     }
