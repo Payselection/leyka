@@ -24,11 +24,6 @@
             return; /** @todo Add some error to the form! Or at least do some console.logging */
         }
 
-        let $revo_redirect_step = $form.closest('.leyka-pf').find('.leyka-pf__redirect');
-        if($revo_redirect_step.length) {
-            $revo_redirect_step.addClass('leyka-pf__redirect--open');
-        }
-
         if($form.data('submit-in-process')) {
             return;
         } else {
@@ -114,8 +109,10 @@
                         window.location.href = response.success_page;
                     },
                     onError: (res) => {
-                        addError($errors, leyka.payselection_donation_failure_reasons[res] || res)
-                        window.location.href = response.failure_page;
+                        if (res === 'PAY_WIDGET:CLOSE_AFTER_FAIL') {
+                            window.location.href = response.failure_page;
+                        }
+                        addError($errors, leyka.payselection_donation_failure_reasons[res] || res);
                     },
                     onClose: () => {
                     }
@@ -125,11 +122,15 @@
             if (response.payselection_method == 'redirect') {
                 if (response.payselection_redirect_url) {
                     window.location.href = response.payselection_redirect_url;
+                } 
+                if (response.payselection_redirect_error) {
+                    addError($errors, leyka.payselection_donation_failure_reasons[response.payselection_redirect_error] || response.payselection_redirect_error);
                 }
             }
-            
-            if($revo_redirect_step.length) {
-                $revo_redirect_step.removeClass('leyka-pf__redirect--open');
+
+            let $loader_overlay = $('[id^="paywidget-loading-overlay-"]');
+            if($loader_overlay.length) {
+                $loader_overlay.css('display', 'none');
             }
 
             if($form.hasClass('leyka-revo-form')) {

@@ -249,7 +249,9 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             leyka_options()->opt('payselection_host'),
             leyka_options()->opt('payselection_create_host')
         );
-        $response['payselection_redirect_url'] = $api->getPaymentLink($response['request']);
+        $payment_create_request = $api->getPaymentLink($response['request']);
+        $response['payselection_redirect_url'] = !is_wp_error($payment_create_request) ? $payment_create_request : '';
+        $response['payselection_redirect_error'] = is_wp_error($payment_create_request) ? $payment_create_request->get_error_message() : '';
 
         if ('widget' === $this->_ps_method) {
             $response['request']['MetaData']['Initiator']  = 'Widget';

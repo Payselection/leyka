@@ -61,7 +61,7 @@ class Payselection_Merchant_Api
             return $response["body"];
         }
 
-        return new \WP_Error("payselection", $response["body"]["Code"] . ($response["body"]["Description"] ? " " . $response["body"]["Description"] : ""));
+        return new \WP_Error("payselection_request_error", $response["body"]["Code"] . ($response["body"]["Description"] ? " " . $response["body"]["Description"] : ""));
     }
 
     /**
@@ -183,7 +183,7 @@ class Payselection_Merchant_Api
 
         if ($site_id != $headers['X-SITE-ID'] ) {
             return new \WP_Error(
-                'payselection_donation_webhook_error',
+                'payselection_donation_webhook_site_id_error',
                 sprintf(__('A call to your Payselection callback was called with wrong site id. Site id from request: %s, Site id from options: %s', 'leyka'), $headers['X-SITE-ID'], $site_id)
             );
         }
@@ -194,7 +194,7 @@ class Payselection_Merchant_Api
 
         if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
             return new \WP_Error(
-                'payselection_donation_webhook_error',
+                'payselection_donation_webhook_signature_error',
                 sprintf(__('A call to your Payselection callback was called with wrong digital signature. It may mean that someone is trying to hack your payment website. Signature from request: %s, Signature calculated: %s', 'leyka'), $headers['X-WEBHOOK-SIGNATURE'], $signCalculated)
             );
         }
