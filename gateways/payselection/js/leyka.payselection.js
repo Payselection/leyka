@@ -112,7 +112,7 @@
                         if (res === 'PAY_WIDGET:CLOSE_AFTER_FAIL') {
                             window.location.href = response.failure_page;
                         }
-                        addError($errors, leyka.payselection_donation_failure_reasons[res] || res);
+                        addError($errors, leyka.payselection_error + res);
                     },
                     onClose: () => {
                     }
@@ -124,7 +124,7 @@
                     window.location.href = response.payselection_redirect_url;
                 } 
                 if (response.payselection_redirect_error) {
-                    addError($errors, leyka.payselection_donation_failure_reasons[response.payselection_redirect_error] || response.payselection_redirect_error);
+                    addError($errors, leyka.payselection_error + response.payselection_redirect_error);
                 }
             }
 

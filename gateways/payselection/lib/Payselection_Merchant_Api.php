@@ -105,8 +105,7 @@ class Payselection_Merchant_Api
      */
     public function getPaymentLink(array $data = [])
     {
-        $host = $this->create_host ?: $this->host;
-        return $this->request($host, 'webpayments/create', $data, 'POST');
+        return $this->request($this->create_host, 'webpayments/create', $data, 'POST');
     }
     
     /**

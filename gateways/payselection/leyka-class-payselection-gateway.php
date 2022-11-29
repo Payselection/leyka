@@ -134,9 +134,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         return array_merge($js_data, [
             'ajax_wrong_server_response' => __('Error in server response. Please report to the website tech support.', 'leyka'),
             'payselection_not_set_up' => __('Error in Payselection settings. Please report to the website tech support.', 'leyka'),
-            'payselection_donation_failure_reasons' => [
-                'User has cancelled' => __('You cancelled the payment', 'leyka'),
-            ],
+            'payselection_error' => __('Payselection Error:', 'leyka'). ' ',
         ]);
     }
 
@@ -284,11 +282,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         // Possible field values: Payment, Fail, Refund
 
         $data = file_get_contents('php://input');
-
-        $file = get_template_directory() . '/payselection-errors.txt'; 
-        $current = file_get_contents($file);
-        $current .= $data."\n";
-        $open = file_put_contents($file, $current);
 
         $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
 
@@ -497,16 +490,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         }
 
         $response = $api->rebill($data);
-
-        $file = get_template_directory() . '/payselection-errors3.txt'; 
-        $current = file_get_contents($file);
-        if (is_wp_error($response)) {
-            $current .= $response->get_error_message()."\n";
-        } else {
-            $current .= $response ."\n";
-        }
-        
-        $open = file_put_contents($file, $current);
 
         $new_recurring_donation->add_gateway_response($response);
 
