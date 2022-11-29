@@ -45,7 +45,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $this->_options = [
             'payselection_method' => [
                 'type' => 'select',
-                'title' => __('Widget or Redirect', 'leyka'),
+                'title' => __('Widget or Redirect!', 'leyka'),
                 'default' => 'widget',
                 'list_entries' => [
                     'widget' => __('Widget', 'leyka'),
