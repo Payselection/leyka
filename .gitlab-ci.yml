@@ -8,7 +8,7 @@ stages:
   - deploy
 
 deploy-stage:
-  stage: update
+  stage: deploy
   only: 
     - staging
   tags:
