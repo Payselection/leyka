@@ -1,40 +1,54 @@
+variables:
+  repo_dir: ./gateways/payselection/
+  # stage_dir: /wordpess-plugin/wp/wp-content/plugins/
+  stage_dir: /wordpess-plugin/wp/wp-leyka/plugins/
+
 stages:
   - predeploy
   - deploy
 
-deploy-wp:
-  stage: predeploy
-  when: manual
+deploy-stage:
+  stage: update
+  only: 
+    - staging
   tags:
-    - dev-wp-2
+    - wp-staging
   script:
-    - docker-compose up -d
-    - sleep 25
-    - cd /var/www/html/wp-content/plugins && sudo chmod 777 . && git clone https://github.com/Teplitsa/Leyka.git
+    - sudo rsync --remove-source-files -r ${repo_dir} ${stage_dir} 
+    - sudo chown -R www-data:www-data ${stage_dir}
+# deploy-wp:
+#   stage: predeploy
+#   when: manual
+#   tags:
+#     - dev-wp-2
+#   script:
+#     - docker-compose up -d
+#     - sleep 25
+#     - cd /var/www/html/wp-content/plugins && sudo chmod 777 . && git clone https://github.com/Teplitsa/Leyka.git
 
-restart-wp:
-  stage: predeploy
-  when: manual
-  tags:
-   - dev-wp-2
-  script:
-    - docker-compose stop
-    - docker-compose up -d
+# restart-wp:
+#   stage: predeploy
+#   when: manual
+#   tags:
+#    - dev-wp-2
+#   script:
+#     - docker-compose stop
+#     - docker-compose up -d
 
-full-destroy:
-  stage: predeploy
-  when: manual
-  tags:
-   - dev-wp-2
-  script:
-    - docker-compose down --volumes
-    - sudo rm -rf /var/www/html
+# full-destroy:
+#   stage: predeploy
+#   when: manual
+#   tags:
+#    - dev-wp-2
+#   script:
+#     - docker-compose down --volumes
+#     - sudo rm -rf /var/www/html
 
-plugin-deploy:
-  stage: deploy
-  when: manual
-  tags:
-    - dev-wp-2
-  script:
-    - sudo chown -R gitlab-runner *
-    - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways/payselection /var/www/html/wp-content/plugins/Leyka/gateways
+# plugin-deploy:
+#   stage: deploy
+#   when: manual
+#   tags:
+#     - dev-wp-2
+#   script:
+#     - sudo chown -R gitlab-runner *
+#     - rsync -rlv --delete --exclude '.gitlab-ci.yml' --exclude '.git*' ./gateways/payselection /var/www/html/wp-content/plugins/Leyka/gateways
