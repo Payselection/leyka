@@ -1,7 +1,6 @@
 variables:
   repo_dir: ./gateways/payselection/
-  # stage_dir: /wordpess-plugin/wp/wp-content/plugins/
-  stage_dir: /wordpress-leyka/plugins/test
+  stage_dir: /wordpress-leyka/wp/wp-content/plugins/leyka/gateways/payselection
 
 stages:
   - predeploy
