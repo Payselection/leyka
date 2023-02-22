@@ -354,6 +354,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         }
 
+        $file = get_template_directory() . '/payselection-webhook.txt'; 
+        $current = file_get_contents($file);
+        $current .= "response[Event] = " .$response['Event']."\n";
+        $open = file_put_contents($file, $current);
+
         switch($response['Event']) {
             case 'Fail': 
                 $new_status = 'failed'; 
