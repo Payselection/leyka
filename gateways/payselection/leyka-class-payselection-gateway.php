@@ -294,9 +294,10 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $current = file_get_contents($file);
         if (is_wp_error($check)) {
             $current .= "check error = ".$check->get_error_message()."\n";
-        } else {
-
+        } elseif ($check) {
             $current .= "check not error\n\n\n";
+        } else {
+            $current .= "check fffffffffffff\n\n\n";
         }
         $open = file_put_contents($file, $current);
 
