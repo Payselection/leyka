@@ -188,15 +188,16 @@ class Payselection_Merchant_Api
         }
         
         // Check signature
-        // $signBody = $_SERVER['REQUEST_METHOD'] . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . $request;
-        // $signCalculated = self::getSignature($signBody, $secret_key);
+        $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
+        $signBody = $request_method . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . $request;
+        $signCalculated = self::getSignature($signBody, $secret_key);
 
-        // if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
-        //     return new \WP_Error(
-        //         'payselection_donation_webhook_signature_error',
-        //         sprintf(__('A call to your Payselection callback was called with wrong digital signature. It may mean that someone is trying to hack your payment website. Signature from request: %s, Signature calculated: %s', 'leyka'), $headers['X-WEBHOOK-SIGNATURE'], $signCalculated)
-        //     );
-        // }
+        if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
+            return new \WP_Error(
+                'payselection_donation_webhook_signature_error',
+                sprintf(__('A call to your Payselection callback was called with wrong digital signature. It may mean that someone is trying to hack your payment website. Signature from request: %s, Signature calculated: %s', 'leyka'), $headers['X-WEBHOOK-SIGNATURE'], $signCalculated)
+            );
+        }
 
         return true;
     }
