@@ -296,7 +296,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             $current .= "check error = ".$check->get_error_message()."\n";
         } else {
 
-            $current .= "check = "."\n";
+            $current .= "check = ".$check."\n";
         }
         $open = file_put_contents($file, $current);
 
