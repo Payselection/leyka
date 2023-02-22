@@ -283,12 +283,13 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $data = file_get_contents('php://input');
 
+        $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
+
         $file = get_template_directory() . '/payselection-webhook.txt'; 
         $current = file_get_contents($file);
-        $current .= $data."\n";
+        $current .= "data = ".$data."\n";
+        $current .= "check = "."\n";
         $open = file_put_contents($file, $current);
-
-        $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
 
         $response = [];
         try {
@@ -353,11 +354,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             die();
 
         }
-
-        $file = get_template_directory() . '/payselection-webhook.txt'; 
-        $current = file_get_contents($file);
-        $current .= "response[Event] = " .$response['Event']."\n";
-        $open = file_put_contents($file, $current);
 
         switch($response['Event']) {
             case 'Fail': 
