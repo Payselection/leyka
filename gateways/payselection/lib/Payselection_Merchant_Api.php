@@ -87,7 +87,7 @@ class Payselection_Merchant_Api
      * @param  string $secretKey
      * @return string
      */
-    protected function getSignature(string $body, string $secretKey)
+    protected static function getSignature(string $body, string $secretKey)
     {
         if (empty($body)) {
             return ";";
