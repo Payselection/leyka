@@ -199,15 +199,15 @@ class Payselection_Merchant_Api
         //$request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
         $request_method = 'POST';
         $signBody = $request_method . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . json_encode($request);
-        $signCalculated = self::getSignature($signBody, $secret_key);
 
         $file = get_template_directory() . '/payselection-webhook.txt'; 
         $current = file_get_contents($file);
         $current .= "signBody = ".$signBody."\n\n\n\n";
-        $current .= "signCalculated = ".$signCalculated."\n\n\n\n";
+        //$current .= "signCalculated = ".$signCalculated."\n\n\n\n";
         $current .= "headers[X-WEBHOOK-SIGNATURE] = ".$headers['X-WEBHOOK-SIGNATURE']."\n\n\n\n";
         $open = file_put_contents($file, $current);
 
+        $signCalculated = self::getSignature($signBody, $secret_key);
 
         if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
             return new \WP_Error(
