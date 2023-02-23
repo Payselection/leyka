@@ -327,7 +327,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
             if(leyka_options()->opt('notify_tech_support_on_failed_donations')) {
 
-                $message = sprintf(__('This message has been sent because %s The details of the call are below:', 'leyka'), $check->get_error_message)."\n\r\n\r"
+                $message = sprintf(__('This message has been sent because %s The details of the call are below:', 'leyka'), $check->get_error_message())."\n\r\n\r"
                 .esc_html($check->get_error_message())."\n\r\n\r"
                 ."POST:\n\r".print_r($_POST, true)."\n\r\n\r"
                 ."GET:\n\r".print_r($_GET, true)."\n\r\n\r"
@@ -341,7 +341,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
             }
 
-            $this->_handle_callback_error($check->get_error_message, $donation);
+            $this->_handle_callback_error($check->get_error_message(), $donation);
 
             die();
 

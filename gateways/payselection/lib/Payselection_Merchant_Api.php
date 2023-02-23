@@ -192,8 +192,6 @@ class Payselection_Merchant_Api
         $signBody = $request_method . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . $request;
         $signCalculated = self::getSignature($signBody, $secret_key);
 
-
-
         if ($headers['X-WEBHOOK-SIGNATURE'] !== $signCalculated) {
             return new \WP_Error(
                 'payselection_donation_webhook_signature_error',
