@@ -187,27 +187,9 @@ class Payselection_Merchant_Api
             );
         }
         
-
-        $file = get_template_directory() . '/payselection-webhook.txt'; 
-        $current = file_get_contents($file);
-        $current .= "$_SERVER[REQUEST_METHOD] = ".$_SERVER['REQUEST_METHOD']."\n\n\n\n";
-        $open = file_put_contents($file, $current);
-
-
-
         // Check signature
         $request_method = isset($_SERVER['REQUEST_METHOD']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'])) : '';
         $signBody = $request_method . PHP_EOL . home_url('/leyka/service/payselection/response') . PHP_EOL . $site_id . PHP_EOL . $request;
-        
-
-        $file = get_template_directory() . '/payselection-webhook.txt'; 
-        $current = file_get_contents($file);
-        $current .= "signBody = ".$signBody."\n\n\n\n";
-        $current .= "secret_key = ".$secret_key."\n\n\n\n";
-        //$current .= "signCalculated = ".$signCalculated."\n\n\n\n";
-        $current .= "headers[X-WEBHOOK-SIGNATURE] = ".$headers['X-WEBHOOK-SIGNATURE']."\n\n\n\n";
-        $open = file_put_contents($file, $current);
-
         $signCalculated = self::getSignature($signBody, $secret_key);
 
 

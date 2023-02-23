@@ -264,6 +264,11 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         if($donation) {
     
             $_POST['failure_reason'] = $error_message;
+
+            $file = get_template_directory() . '/payselection-webhook.txt'; 
+            $current = file_get_contents($file);
+            $current .= "$_poST = ".$_POST."\n\n\n\n";
+            $open = file_put_contents($file, $current);
     
             $donation->add_gateway_response($_POST);
             $donation->status = 'failed';
