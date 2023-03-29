@@ -264,11 +264,6 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         if($donation) {
     
             $response['failure_reason'] = $error_message;
-
-            $file = get_template_directory() . '/payselection-webhook.txt'; 
-            $current = file_get_contents($file);
-            $current .= "$response = ".json_encode($response)."\n\n\n\n";
-            $open = file_put_contents($file, $current);
     
             $donation->add_gateway_response($response);
             $donation->status = 'failed';
@@ -288,23 +283,7 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
         $data = file_get_contents('php://input');
 
-        $file = get_template_directory() . '/payselection-webhook.txt'; 
-        $current = file_get_contents($file);
-        $current .= "data = ".$data."\n\n\n\n";
-        $open = file_put_contents($file, $current);
-
         $check = \Payselection_Merchant_Api::verify_header_signature($data, leyka_options()->opt('payselection_site_id'), leyka_options()->opt('payselection_key'));
-
-        $file = get_template_directory() . '/payselection-webhook.txt'; 
-        $current = file_get_contents($file);
-        if (is_wp_error($check)) {
-            $current .= "check error = ".$check->get_error_message()."\n";
-        } elseif ($check) {
-            $current .= "check not error\n\n\n";
-        } else {
-            $current .= "check fffffffffffff\n\n\n";
-        }
-        $open = file_put_contents($file, $current);
 
         $response = [];
         try {
