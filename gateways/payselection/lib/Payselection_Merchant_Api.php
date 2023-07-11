@@ -170,8 +170,7 @@ class Payselection_Merchant_Api
      */
     public static function verify_header_signature($request, $site_id, $secret_key)
     {
-        //$headers = self::key_tolower(getallheaders());
-        $headers = self::key_tolower(false);
+        $headers = self::key_tolower(getallheaders());
 
         if (
             empty($request) ||
