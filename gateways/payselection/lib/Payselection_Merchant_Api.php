@@ -61,7 +61,11 @@ class Payselection_Merchant_Api
             return $response["body"];
         }
 
-        return new \WP_Error("payselection_request_error", $response["body"]["Code"] . ($response["body"]["Description"] ? " " . $response["body"]["Description"] : ""));
+        if ($response["body"]["Code"]) {
+            return new \WP_Error($response["body"]["Code"], $response["body"]["Code"] . ($response["body"]["Description"] ? " " . $response["body"]["Description"] : ""));
+        }
+
+        return new \WP_Error("payselection_request_error", __("Payselection API request error", "leyka"));
     }
 
     /**
