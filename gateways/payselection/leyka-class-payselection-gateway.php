@@ -136,6 +136,16 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             'ajax_wrong_server_response' => __('Error in server response. Please report to the website tech support.', 'leyka'),
             'payselection_not_set_up' => __('Error in Payselection settings. Please report to the website tech support.', 'leyka'),
             'payselection_error' => __('Payselection Error:', 'leyka'). ' ',
+            'payselection_widget_errors' => [
+                'PAY_WIDGET:CREATE_INVALID_PARAMS' => __('Parameter error', 'leyka'), //onError
+                'PAY_WIDGET:CREATE_BAD_REQUEST_ERROR' => __('System error', 'leyka'), //onError
+                'PAY_WIDGET:CREATE_NETWORK_ERROR' => __('Network error', 'leyka'), //onError
+                'PAY_WIDGET:TRANSACTION_FAIL' => __('Transaction error', 'leyka'), //onError
+                'PAY_WIDGET:CLOSE_COMMON_ERROR' => __('Close after an error', 'leyka'), //onClose
+                'PAY_WIDGET:CLOSE_BEFORE_PAY' => __('Payment not completed', 'leyka'), //onClose
+                'PAY_WIDGET:CLOSE_AFTER_FAIL' => __('Close after fail', 'leyka'), //onClose
+                'PAY_WIDGET:CLOSE_AFTER_SUCCESS' => __('Close after success', 'leyka'), //onClose
+            ],
         ]);
     }
 
