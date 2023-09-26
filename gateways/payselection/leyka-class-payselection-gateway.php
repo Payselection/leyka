@@ -115,7 +115,26 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
                 'comment' => __('If this option is enabled order receipts will be created and sent to your customer and to the revenue service via Payselection.', 'leyka'),
                 'short_format' => true,
             ],
+            'site_ip' => [
+                'type' => 'static_text',
+                'title' => __('Site IP', 'leyka'),
+                'is_html' => true,
+                'value' => $this->get_site_ip_content(),
+            ],
         ];
+    }
+
+    public function get_site_ip_content() {
+
+        $response = wp_remote_get('https://ipapi.co/json/');
+
+        if ( is_array($response) && !is_wp_error($response) ) {
+            $body = json_decode($response['body'], true); 
+            return '<div>'.esc_html($body['ip']).'</div>';
+        }
+
+        return false;
+
     }
 
     public function is_setup_complete($pm_id = false) {
