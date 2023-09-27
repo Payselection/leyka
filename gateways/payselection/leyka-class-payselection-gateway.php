@@ -126,16 +126,10 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
 
     public function get_site_ip_content() {
 
-        $response = wp_remote_get('https://ipapi.co/json/');
+        $response = wp_remote_get('https://api.ipify.org/');
 
         if ( is_array($response) && !is_wp_error($response) ) {
-            // $body = json_decode($response['body'], true); 
-            // return '<div>'.esc_html($body['ip']).'</div>';
             return '<div>'.$response['body'].'</div>';
-        }
-
-        if (is_wp_error($response)) {
-            return $response->get_error_code().': '.$response->get_error_message();
         }
 
         return false;
