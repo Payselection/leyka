@@ -129,8 +129,9 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
         $response = wp_remote_get('https://ipapi.co/json/');
 
         if ( is_array($response) && !is_wp_error($response) ) {
-            $body = json_decode($response['body'], true); 
-            return '<div>'.esc_html($body['ip']).'</div>';
+            // $body = json_decode($response['body'], true); 
+            // return '<div>'.esc_html($body['ip']).'</div>';
+            return '<div>'.$response['body'].'</div>';
         }
 
         if (is_wp_error($response)) {
