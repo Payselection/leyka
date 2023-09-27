@@ -133,6 +133,10 @@ class Leyka_Payselection_Gateway extends Leyka_Gateway {
             return '<div>'.esc_html($body['ip']).'</div>';
         }
 
+        if (is_wp_error($response)) {
+            return $response->get_error_code().': '.$response->get_error_message();
+        }
+
         return false;
 
     }
